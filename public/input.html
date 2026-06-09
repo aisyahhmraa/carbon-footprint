@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Green Campus Carbon Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    background:linear-gradient(135deg,#eef2f9,#f8fbff);
+    font-family:'Segoe UI', sans-serif;
+}
+
+.section{
+    display:none;
+    opacity:0;
+    transition:0.5s ease;
+    padding:80px 0;
+}
+
+.section.active{
+    display:block;
+    opacity:1;
+}
+
+.hero-box{
+    background:white;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:hidden;
+}
+
+.hero-box::before{
+    content:"";
+    position:absolute;
+    top:-50px;
+    right:-50px;
+    width:150px;
+    height:150px;
+    background:#1b2a49;
+    opacity:0.05;
+    border-radius:50%;
+}
+
+.hero-img{
+    max-width:100%;
+    border-radius:20px;
+}
+
+.title{
+    font-weight:700;
+    color:#1b2a49;
+}
+
+.highlight{
+    color:#1b2a49;
+    font-weight:600;
+}
+
+.form-box{
+    background:#ffffff;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.08);
+    margin-top:40px;
+}
+
+.btn-premium{
+    background:#1b2a49;
+    color:white;
+    border:none;
+    padding:12px 30px;
+    border-radius:50px;
+    transition:0.3s;
+}
+
+.btn-premium:hover{
+    background:#0f1b33;
+    transform:translateY(-2px);
+}
+
+.result-box{
+    background:#eef3ff;
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;
+    font-weight:600;
+}
+
+.progress{
+    height:10px;
+    border-radius:10px;
+    margin-top:30px;
+}
+
+.step-indicator{
+    text-align:center;
+    margin-top:15px;
+    font-weight:500;
+    color:#555;
+}
+
+/* TAMBAHAN TABLE */
+table{
+    border-radius:12px;
+    overflow:hidden;
+}
+
+table tbody tr:hover{
+    background:#eef3ff;
+    transform:scale(1.01);
+    transition:0.2s;
+}
+
+table td, table th{
+    padding:12px;
+    text-align:center;
+}
+
+#editFormBox::-webkit-scrollbar {
+    width:8px;
+}
+
+#editFormBox::-webkit-scrollbar-thumb {
+    background:#1b2a49;
+    border-radius:10px;
+}
+
+#editFormBox {
+    opacity:0;
+    transform:translate(-50%, -60%);
+    transition:all 0.3s ease;
+}
+
+#editFormBox.show {
+    opacity:1;
+    transform:translate(-50%, -50%);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2 class="text-center mt-4">🌱 Green Campus Carbon Footprint Calculator</h2>
+
+<div class="progress">
+<div id="progressBar" class="progress-bar bg-dark" style="width:33%"></div>
+</div>
+
+<div class="step-indicator">
+Step <span id="stepText">1</span> of 3
+</div>
+
+<!-- STEP 1  -->
+<div id="step1" class="section active">
+
+<div class="row align-items-center g-5 hero-box">
+
+<div class="col-md-6">
+
+<h2 class="title">⚡ Emisi Karbon – Penggunaan Listrik</h2>
+
+<p class="mt-3">
+Emisi Penggunaan Listrik adalah emisi yang berasal dari listrik yang digunakan dan dibeli dari pembangkit eksternal (bukan dari pembangkit sendiri).
+</p>
+
+<p>
+Untuk menghasilkan listrik, pemasok membakar batu bara, gas alam, dan bahan bakar fosil lainnya sehingga menghasilkan <span class="highlight">CO₂, CH₄, dan N₂O</span>.
+</p>
+
+<p>
+Emisi ini termasuk dalam <span class="highlight">Scope 2</span>, yang menjadi tanggung jawab pengguna listrik.
+</p>
+
+<p class="fw-bold mt-4">
+Yuk hitung emisi listrik kampus kamu sekarang 👇
+</p>
+
+</div>
+
+<div class="col-md-6 text-center">
+<img src="/electricity.png" class="hero-img">
+</div>
+
+</div>
+
+<div class="form-box">
+
+<label class="form-label">Total Penggunaan Listrik per Tahun (kWh)</label>
+<input type="number" id="electricity" class="form-control mb-3">
+
+<button class="btn-premium" onclick="calcElectricity()">Hitung Emisi</button>
+<button class="btn btn-outline-dark ms-2" onclick="nextStep(2)">Next →</button>
+
+<div id="result1" class="result-box d-none"></div>
+
+</div>
+
+</div>
+
+<!-- ================= STEP 2 ================= -->
+<div id="step2" class="section">
+
+<div class="row align-items-center g-5 hero-box">
+
+<div class="col-md-6">
+
+<h2 class="title">🚗 Emisi Karbon – Transportasi Kampus</h2>
+
+<p>
+Emisi transportasi berasal dari kendaraan yang beroperasi di lingkungan kampus, seperti motor, mobil, dan bus. Perhitungannya didasarkan pada jumlah kendaraan, rata-rata jarak tempuh harian, serta asumsi 240 hari operasional per tahun.
+</p>
+
+<p>
+Pembakaran bahan bakar seperti bensin dan solar menghasilkan CO₂ yang berkontribusi terhadap emisi karbon. Emisi ini termasuk <span class="highlight">Scope 1</span> untuk kendaraan operasional milik institusi, dan <span class="highlight">Scope 3</span> untuk kendaraan pribadi mahasiswa serta dosen.
+</p>
+
+<p class="fw-bold">
+Hitung emisi transportasi kampusmu sekarang 👇
+</p>
+
+</div>
+
+<div class="col-md-6 text-center">
+<img src="/transport.png" class="hero-img">
+</div>
+
+</div>
+
+<div class="form-box">
+
+<div class="row">
+
+<div class="col-md-4">
+<h6>🚌 Shuttle Bus</h6>
+<label class="form-label">Jumlah Bus</label>
+<input type="number" id="busCount" class="form-control mb-2">
+
+<label class="form-label">Trip per Hari</label>
+<input type="number" id="busTrip" class="form-control mb-2">
+
+<label class="form-label">Jarak per Hari (km)</label>
+<input type="number" id="busDistance" class="form-control mb-2">
+</div>
+
+<div class="col-md-4">
+<h6>🚙 Car</h6>
+<label class="form-label">Jumlah Mobil</label>
+<input type="number" id="carCount" class="form-control mb-2">
+
+<label class="form-label">Jarak per Hari (km)</label>
+<input type="number" id="carDistance" class="form-control mb-2">
+</div>
+
+<div class="col-md-4">
+<h6>🏍 Motorcycle</h6>
+<label class="form-label">Jumlah Motor</label>
+<input type="number" id="motorCount" class="form-control mb-2">
+
+<label class="form-label">Jarak per Hari (km)</label>
+<input type="number" id="motorDistance" class="form-control mb-2">
+</div>
+
+</div>
+
+<button class="btn-premium mt-3" onclick="calcTransport()">Hitung Emisi Transport</button>
+<button class="btn btn-outline-secondary ms-2" onclick="nextStep(1)">← Back</button>
+<button class="btn btn-outline-dark ms-2" onclick="nextStep(3)">Next →</button>
+
+<div id="result2" class="result-box d-none"></div>
+
+</div>
+
+</div>
+
+<!-- ================= STEP 3 TOTAL ================= -->
+<div id="step3" class="section">
+
+<div class="row align-items-center g-5 hero-box">
+
+<!-- KIRI (TEKS) -->
+<div class="col-md-6">
+
+<h2 class="title">📊 Total Emisi Karbon </h2>
+
+<p>
+Total emisi dihitung dari penggunaan listrik ditambah seluruh emisi transportasi. Hasil ini membantu merancang strategi efisiensi energi dan pengurangan jejak karbon menuju Green Campus.
+</p>
+
+<button class="btn-premium" onclick="showTotal()">Hitung Total Emisi</button>
+<button class="btn btn-outline-secondary ms-2" onclick="nextStep(2)">← Back</button>
+<button class="btn btn-success ms-2" onclick="saveData()">Save</button>
+<button class="btn btn-info ms-2" onclick="loadHistory()">History</button>
+
+<div id="finalResult" class="result-box d-none"></div>
+<h6 class="mt-4">Emission Breakdown (Today)</h6>
+<canvas id="todayChart" class="mt-3"></canvas>
+
+<h6 class="mt-4">Total Emission History</h6>
+<canvas id="historyChart" class="mt-3"></canvas>
+
+</div>
+
+<!-- KANAN (GAMBAR + CHART + HISTORY) -->
+<div class="col-md-6 text-center">
+
+<div id="historyBox" class="mt-4"></div>
+
+<img src="/total.png" class="hero-img mb-3">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" onclick="closeForm()" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+z-index:998;
+"></div>
+
+<!-- FORM EDIT -->
+<div id="editFormBox" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+background:white;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+z-index:999;
+
+width:900px;
+max-width:95%;
+
+max-height:90vh;   /* 🔥 BATAS TINGGI */
+overflow-y:auto;   /* 🔥 AKTIFKAN SCROLL */
+">
+
+    <div class="form-box" style="position:relative;">
+
+        <!-- TOMBOL CLOSE -->
+        <button onclick="closeForm()" style="
+        position:absolute;
+        top:-10px;
+        right:-10px;
+        border:none;
+        background:red;
+        color:white;
+        border-radius:50%;
+        width:30px;
+        height:30px;
+        cursor:pointer;
+        ">✖</button>
+
+        <h4>✏️ Edit Data</h4>
+
+        <input type="hidden" id="editId">
+
+        <label>Electricity (kWh)</label>
+        <input type="number" id="editElectricity" class="form-control mb-2" oninput="autoCalculateTotal()">
+
+        <h6 class="mt-3">🚌 Bus</h6>
+        <label class="form-label">Jumlah Bus</label>
+        <input type="number" id="editBusCount" class="form-control mb-2" oninput="autoCalculateTotal()">
+        <label class="form-label">Trip per Hari</label>
+        <input type="number" id="editBusTrip" class="form-control mb-2" oninput="autoCalculateTotal()">
+        <label class="form-label">Jarak (km)</label>
+        <input type="number" id="editBusDistance" class="form-control mb-3" oninput="autoCalculateTotal()">
+
+        <h6 class="mt-3">🚙 Car</h6>
+        <label class="form-label">Jumlah Mobil</label>
+        <input type="number" id="editCarCount" class="form-control mb-2" oninput="autoCalculateTotal()">
+        <label class="form-label">Jarak (km)</label>
+        <input type="number" id="editCarDistance" class="form-control mb-3" oninput="autoCalculateTotal()">
+
+        <h6 class="mt-3">🏍 Motor</h6>
+        <label class="form-label">Jumlah Motor</label>
+        <input type="number" id="editMotorCount" class="form-control mb-2" oninput="autoCalculateTotal()">
+        <label class="form-label">Jarak (km)</label>
+        <input type="number" id="editMotorDistance" class="form-control mb-3" oninput="autoCalculateTotal()">
+
+        <label class="form-label">Total Emisi</label>
+        <input type="number" id="editTotal" class="form-control mb-3" readonly>
+
+        <button onclick="updateData()" class="btn btn-success">Update</button>
+
+    </div>
+
+</div>
+
+<script>
+
+let electricityEmission=0;
+let busEmission=0;
+let carEmission=0;
+let motorEmission=0;
+let todayChart=null;
+let historyChart=null;
+
+function nextStep(step){
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+    document.getElementById("step"+step).classList.add("active");
+    document.getElementById("progressBar").style.width=(step*33)+"%";
+    document.getElementById("stepText").innerText=step;
+}
+
+function calcElectricity(){
+    const electricity=parseFloat(document.getElementById("electricity").value)||0;
+    electricityEmission=(electricity/1000)*0.84;
+
+    document.getElementById("result1").classList.remove("d-none");
+    document.getElementById("result1").innerHTML=
+    "⚡ "+electricityEmission.toFixed(2)+" metric tons CO₂ ";
+}
+
+function calcTransport(){
+
+    const busCount=parseFloat(document.getElementById("busCount").value)||0;
+    const busTrip=parseFloat(document.getElementById("busTrip").value)||0;
+    const busDistance=parseFloat(document.getElementById("busDistance").value)||0;
+    busEmission=((busCount*busTrip*busDistance*240)/100)*0.01;
+
+    const carCount=parseFloat(document.getElementById("carCount").value)||0;
+    const carDistance=parseFloat(document.getElementById("carDistance").value)||0;
+    carEmission=((carCount*2*carDistance*240)/100)*0.02;
+
+    const motorCount=parseFloat(document.getElementById("motorCount").value)||0;
+    const motorDistance=parseFloat(document.getElementById("motorDistance").value)||0;
+    motorEmission=((motorCount*2*motorDistance*240)/100)*0.01;
+
+    document.getElementById("result2").classList.remove("d-none");
+    document.getElementById("result2").innerHTML=
+    "🚌 Bus: "+busEmission.toFixed(2)+" metric tons CO₂<br>"+
+    "🚙 Car: "+carEmission.toFixed(2)+" metric tons CO₂<br>"+
+    "🏍 Motorcycle: "+motorEmission.toFixed(2)+" metric tons CO₂";
+}
+
+function showTotal(){
+
+    const total = electricityEmission + busEmission + carEmission + motorEmission;
+
+    document.getElementById("finalResult").classList.remove("d-none");
+    document.getElementById("finalResult").innerHTML =
+    "🌍 <b>Total Emission:</b><br>"+total.toFixed(2)+" metric tons CO₂";
+
+    if(todayChart){todayChart.destroy();}
+
+    todayChart = new Chart(document.getElementById("todayChart"),{
+        type:'bar',
+        data:{
+            labels:['Electricity','Bus','Car','Motorcycle','Total'],
+            datasets:[{
+                label:'Emission (metric tons CO₂)',
+                data:[
+                    electricityEmission,
+                    busEmission,
+                    carEmission,
+                    motorEmission,
+                    total
+                ],
+                backgroundColor:[
+                    '#1b2a49',
+                    '#4e73df',
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#1cc88a'
+                ]
+            }]
+        },
+        options:{
+            responsive:true,
+            scales:{
+                y:{
+                    beginAtZero:true
+                }
+            }
+        }
+    });
+
+}
+
+function saveData(){
+
+    const total = electricityEmission + busEmission + carEmission + motorEmission;
+
+    fetch('/save-carbon',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            // 🔥 INPUT ASLI
+            electricity: document.getElementById("electricity").value,
+
+            busCount: document.getElementById("busCount").value,
+            busTrip: document.getElementById("busTrip").value,
+            busDistance: document.getElementById("busDistance").value,
+
+            carCount: document.getElementById("carCount").value,
+            carDistance: document.getElementById("carDistance").value,
+
+            motorCount: document.getElementById("motorCount").value,
+            motorDistance: document.getElementById("motorDistance").value,
+
+            // 🔥 HASIL
+            electricityEmission,
+            busEmission,
+            carEmission,
+            motorEmission,
+            totalEmission: total
+        })
+    })
+    .then(res=>res.text())
+    .then(data=>{
+        alert(data);
+        loadHistory();
+    });
+}
+
+function loadHistory(){
+
+    fetch('/history')
+    .then(res=>res.json())
+    .then(data=>{
+
+        let labels=[];
+        let totals=[];
+
+        let html = `
+        <h5 class="mb-3">📋 History Data</h5>
+
+        <div class="table-responsive">
+        <table class="table table-bordered table-hover shadow-sm">
+
+        <thead style="background:#1b2a49; color:white;">
+        <tr>
+        <th>Tanggal</th>
+        <th>Total Emisi</th>
+        <th>Aksi</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        `;
+
+        data.forEach(item=>{
+
+            const date = new Date(item.created_at).toLocaleDateString();
+
+            labels.push(date);
+            totals.push(item.total_emission);
+
+            html += `
+            <tr onclick="showHistoryChart(
+                ${item.electricity_emission},
+                ${item.bus_emission},
+                ${item.car_emission},
+                ${item.motor_emission},
+                ${item.total_emission}
+            )" style="cursor:pointer">
+
+                <td>${date}</td>
+                <td><b>${item.total_emission} ton</b></td>
+
+                <td>
+                    <button 
+                        onclick="event.stopPropagation(); editData(
+                            ${item.id},
+                            ${item.electricity},
+                            ${item.bus_count},
+                            ${item.bus_trip},
+                            ${item.bus_distance},
+                            ${item.car_count},
+                            ${item.car_distance},
+                            ${item.motor_count},
+                            ${item.motor_distance}
+                        )" 
+                        class="btn btn-warning btn-sm">
+                        Edit
+                    </button>
+
+                    <button 
+                        onclick="event.stopPropagation(); deleteData(${item.id})" 
+                        class="btn btn-danger btn-sm">
+                        Delete
+                    </button>
+                </td>
+
+            </tr>
+            `;
+        });
+
+        html += `
+        </tbody>
+        </table>
+        </div>
+        `;
+
+        document.getElementById("historyBox").innerHTML = html;
+
+        if(historyChart){historyChart.destroy();}
+
+        historyChart = new Chart(document.getElementById("historyChart"),{
+            type:'bar',
+            data:{
+                labels:labels,
+                datasets:[{
+                    label:'Total Emission per Date',
+                    data:totals,
+                    backgroundColor: '#1b2a49'
+                }]
+            },
+            options:{
+                responsive:true,
+                scales:{
+                    y:{
+                        beginAtZero:true
+                    }
+                }
+            }
+        });
+
+    });
+}
+
+function deleteData(id){
+
+    if(confirm("Yakin mau hapus data?")){
+
+        fetch('/delete-carbon/' + id, {
+            method: 'DELETE'
+        })
+        .then(res => res.text())
+        .then(data => {
+            alert(data);
+            loadHistory();
+        });
+
+    }
+}
+
+function editData(id, electricity, busCount, busTrip, busDistance, carCount, carDistance, motorCount, motorDistance){
+
+    // tampilkan form
+    const form = document.getElementById("editFormBox");
+    form.style.display = "block";
+
+    setTimeout(()=>{
+        form.classList.add("show");
+    },10);
+
+    document.getElementById("overlay").style.display = "block";
+
+    // isi data ke form
+    document.getElementById("editId").value = id;
+    document.getElementById("editElectricity").value = electricity;
+    document.getElementById("editBusCount").value = busCount;
+    document.getElementById("editBusTrip").value = busTrip;
+    document.getElementById("editBusDistance").value = busDistance;
+    document.getElementById("editCarCount").value = carCount;
+    document.getElementById("editCarDistance").value = carDistance;
+    document.getElementById("editMotorCount").value = motorCount;
+    document.getElementById("editMotorDistance").value = motorDistance;
+
+}
+
+function autoCalculateTotal(){
+
+    const electricity = document.getElementById("editElectricity").value || 0;
+    const busCount = document.getElementById("editBusCount").value || 0;
+    const busTrip = document.getElementById("editBusTrip").value || 0;
+    const busDistance = document.getElementById("editBusDistance").value || 0;
+
+    const carCount = document.getElementById("editCarCount").value || 0;
+    const carDistance = document.getElementById("editCarDistance").value || 0;
+
+    const motorCount = document.getElementById("editMotorCount").value || 0;
+    const motorDistance = document.getElementById("editMotorDistance").value || 0;
+
+    const electricityEmission = (electricity/1000)*0.84;
+    const busEmission = ((busCount*busTrip*busDistance*240)/100)*0.01;
+    const carEmission = ((carCount*2*carDistance*240)/100)*0.02;
+    const motorEmission = ((motorCount*2*motorDistance*240)/100)*0.002;
+
+    const total = electricityEmission + busEmission + carEmission + motorEmission;
+
+    document.getElementById("editTotal").value = total.toFixed(2);
+}
+
+function closeForm(){
+
+    const form = document.getElementById("editFormBox");
+
+    form.classList.remove("show");
+
+    setTimeout(()=>{
+        form.style.display = "none";
+    },300);
+
+    document.getElementById("overlay").style.display = "none";
+}
+
+function showHistoryChart(electricity,bus,car,motor,total){
+
+    if(todayChart){todayChart.destroy();}
+
+    todayChart = new Chart(document.getElementById("todayChart"),{
+        type:'bar',
+        data:{
+            labels:['Electricity','Bus','Car','Motorcycle','Total'],
+            datasets:[{
+                label:'Emission (metric tons CO₂)',
+                data:[
+                    electricity,
+                    bus,
+                    car,
+                    motor,
+                    total
+                ],
+                backgroundColor:[
+                    '#1b2a49',
+                    '#4e73df',
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#1cc88a'
+                ]
+            }]
+        },
+        options:{
+            responsive:true,
+            scales:{
+                y:{
+                    beginAtZero:true
+                }
+            }
+        }
+    });
+
+}
+
+function updateData(){
+
+    const id = document.getElementById("editId").value;
+
+    // ✅ ambil dari FORM EDIT
+    const electricity = document.getElementById("editElectricity").value || 0;
+
+    const busCount = document.getElementById("editBusCount").value || 0;
+    const busTrip = document.getElementById("editBusTrip").value || 0;
+    const busDistance = document.getElementById("editBusDistance").value || 0;
+
+    const carCount = document.getElementById("editCarCount").value || 0;
+    const carDistance = document.getElementById("editCarDistance").value || 0;
+
+    const motorCount = document.getElementById("editMotorCount").value || 0;
+    const motorDistance = document.getElementById("editMotorDistance").value || 0;
+
+    // ✅ HITUNG ULANG (PENTING 🔥)
+    const electricityEmission = (electricity/1000)*0.84;
+    const busEmission = ((busCount*busTrip*busDistance*240)/100)*0.01;
+    const carEmission = ((carCount*2*carDistance*240)/100)*0.02;
+    const motorEmission = ((motorCount*2*motorDistance*240)/100)*0.002;
+
+    const total = electricityEmission + busEmission + carEmission + motorEmission;
+
+    // ✅ kirim ke backend
+    fetch('/update-carbon/' + id, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+
+            electricity,
+            busCount,
+            busTrip,
+            busDistance,
+
+            carCount,
+            carDistance,
+
+            motorCount,
+            motorDistance,
+
+            electricityEmission,
+            busEmission,
+            carEmission,
+            motorEmission,
+
+            totalEmission: total
+        })
+    })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+
+        closeForm(); // biar rapi
+
+        loadHistory();
+    });
+}
+
+</script>
+
+</body>
+</html>
