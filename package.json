@@ -1,20 +1,23 @@
 {
   "name": "green-campus-carbon",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+
   "dependencies": {
     "bcrypt": "^6.0.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mysql2": "^3.17.1"
   },
+
   "devDependencies": {
     "nodemon": "^3.1.11"
   }
