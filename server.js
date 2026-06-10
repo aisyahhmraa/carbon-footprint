@@ -18,11 +18,41 @@ const db = mysql.createConnection({
     port: process.env.MYSQLPORT
 });
 
-db.connect((err) => {
+db.connect(async (err) => {
     if (err) {
         console.error('Database connection failed:', err);
     } else {
         console.log('✅ Connected to MySQL');
+
+        db.query(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(255) UNIQUE,
+            password TEXT NOT NULL,
+            role ENUM('admin','user') DEFAULT 'user'
+        )
+        `);
+
+        db.query(`
+        CREATE TABLE IF NOT EXISTS carbon_data (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            electricity FLOAT,
+            bus_count INT,
+            bus_trip FLOAT,
+            bus_distance FLOAT,
+            car_count INT,
+            car_distance FLOAT,
+            motor_count INT,
+            motor_distance FLOAT,
+            electricity_emission FLOAT,
+            bus_emission FLOAT,
+            car_emission FLOAT,
+            motor_emission FLOAT,
+            total_emission FLOAT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        `);
     }
 });
 
