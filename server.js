@@ -35,6 +35,13 @@ db.connect(async (err) => {
     )
     `);
 
+    const adminPassword = await bcrypt.hash('ais123', 10);
+    db.query(
+        `INSERT IGNORE INTO users(username,password,role)
+        VALUES (?,?,?)`,
+        ['admin', adminPassword, 'admin']
+    );
+
     db.query(`
     CREATE TABLE IF NOT EXISTS carbon_data (
         id INT AUTO_INCREMENT PRIMARY KEY,
