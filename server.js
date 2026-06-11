@@ -20,9 +20,10 @@ const db = mysql.createConnection({
 
 db.connect(async (err) => {
     if (err) {
-        console.error('Database connection failed:', err);
-    } else {
-        console.log('✅ Connected to MySQL');
+        console.error('❌ Database connection failed:', err);
+        return;
+    }
+    console.log('✅ Connected to Railway MySQL');
 
         db.query(`
         CREATE TABLE IF NOT EXISTS users (
