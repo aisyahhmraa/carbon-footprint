@@ -145,30 +145,50 @@ app.post('/login', (req, res) => {
 
     db.query(sql, [username], async (err, result) => {
 
-        if (err) return res.send("Server error");
+        if (err) {
+            console.error("LOGIN DB ERROR:", err);
+            return res.status(500).send("Server error");
+        }
 
         if (result.length === 0) {
             return res.send("<script>alert('Username tidak ditemukan. Silakan lakukan registrasi terlebih dahulu'); window.location='/login';</script>");
         }
 
-        const user = result[0];
+        try {
 
-        const match = await bcrypt.compare(password, user.password);
+            const user = result[0];
 
-        if (match) {
-            req.session.user = {
-                 id: user.id,
-                role: user.role
-            };
-            if (user.role === 'admin') {
-                return res.redirect('/input');
+            console.log("User ditemukan:", user.username);
+            console.log("Role:", user.role);
+
+            const match = await bcrypt.compare(password, user.password);
+
+            console.log("Password cocok:", match);
+
+            if (match) {
+
+                req.session.user = {
+                    id: user.id,
+                    role: user.role
+                };
+
+                if (user.role === 'admin') {
+                    return res.redirect('/input');
+                } else {
+                    return res.redirect('/history-page');
+                }
+
             } else {
-                return res.redirect('/history-page');
+                return res.send("<script>alert('Password salah'); window.location='/login';</script>");
             }
-        } else {
-            return res.send("<script>alert('Password salah'); window.location='/login';</script>");
+
+        } catch (e) {
+            console.error("LOGIN ERROR:", e);
+            return res.status(500).send("Server error");
         }
+
     });
+
 });
 
 // ======================
