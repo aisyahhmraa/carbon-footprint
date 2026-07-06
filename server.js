@@ -10,59 +10,68 @@ const PORT = 3000;
 // ======================
 // DATABASE CONNECTION
 // ======================
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
-    port: Number(process.env.MYSQLPORT)
+    port: Number(process.env.MYSQLPORT),
+
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect(async (err) => {
-    if (err) {
+(async () => {
+    try {
+        const connection = await db.promise().getConnection();
+
+        console.log('✅ Connected to MySQL');
+
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(255) UNIQUE,
+                password TEXT NOT NULL,
+                role ENUM('admin','user') DEFAULT 'user'
+            )
+        `);
+
+        const adminPassword = await bcrypt.hash('ais123', 10);
+
+        await connection.query(
+            `INSERT IGNORE INTO users(username,password,role)
+            VALUES (?,?,?)`,
+            ['admin', adminPassword, 'admin']
+        );
+
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS carbon_data (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                electricity FLOAT,
+                bus_count INT,
+                bus_trip FLOAT,
+                bus_distance FLOAT,
+                car_count INT,
+                car_distance FLOAT,
+                motor_count INT,
+                motor_distance FLOAT,
+                electricity_emission FLOAT,
+                bus_emission FLOAT,
+                car_emission FLOAT,
+                motor_emission FLOAT,
+                total_emission FLOAT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        connection.release();
+
+    } catch (err) {
         console.error('Database connection failed:', err);
-        return;
     }
-
-    console.log('✅ Connected to MySQL');
-
-    db.query(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(255) UNIQUE,
-        password TEXT NOT NULL,
-        role ENUM('admin','user') DEFAULT 'user'
-    )
-    `);
-
-    const adminPassword = await bcrypt.hash('ais123', 10);
-    db.query(
-        `INSERT IGNORE INTO users(username,password,role)
-        VALUES (?,?,?)`,
-        ['admin', adminPassword, 'admin']
-    );
-
-    db.query(`
-    CREATE TABLE IF NOT EXISTS carbon_data (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT,
-        electricity FLOAT,
-        bus_count INT,
-        bus_trip FLOAT,
-        bus_distance FLOAT,
-        car_count INT,
-        car_distance FLOAT,
-        motor_count INT,
-        motor_distance FLOAT,
-        electricity_emission FLOAT,
-        bus_emission FLOAT,
-        car_emission FLOAT,
-        motor_emission FLOAT,
-        total_emission FLOAT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    `);
-});
+})();
 
 // ======================
 // MIDDLEWARE
