@@ -86,7 +86,7 @@ font-size:20px;
 margin-bottom:20px;
 "></div>
 
-<h5>Grafik Emisi</h5>
+<h5 id="grafikEmisi">📊 Grafik Emisi</h5>
 
 <div id="selectedInfo"
 style="
@@ -185,11 +185,6 @@ function loadHistory(){
 
         document.getElementById("totalBox").innerHTML =
             "Total Emisi: <b>" + totalAll.toFixed(2) + " ton CO₂</b>";
-
-        document.getElementById("grafikEmisi").scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
 
         // tampilkan chart pertama
         if(data.length > 0){
@@ -360,6 +355,14 @@ function showChart(index, element,  button){
     // update total sesuai yg diklik
     document.getElementById("totalBox").innerHTML =
         "Total Emisi (dipilih): <b>" + total + " ton CO₂</b>";
+    
+    const grafik = document.getElementById("grafikEmisi");
+    if (grafik) {
+        grafik.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
 }
 
 // auto load
