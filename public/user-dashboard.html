@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -102,7 +103,9 @@ function loadHistory(){
         <thead>
         <tr>
             <th>Tanggal</th>
+            <th>Nama Perguruan Tinggi</th>
             <th>Total Emisi</th>
+            <th>Aksi</th>
         </tr>
         </thead>
         <tbody>
@@ -123,9 +126,18 @@ function loadHistory(){
             totals.push(total);
 
             html += `
-            <tr onclick="showChart(${index}, this)">
+            <tr>
                 <td>${date}</td>
-                <td>${total} ton</td>
+                <td>${item.university_name ?? '-'}</td>
+                <td><b>${total} ton</b></td>
+
+                <td>
+                    <button
+                        class="btn btn-success btn-sm"
+                        onclick="showChart(${index}, this.closest('tr'))">
+                        <i class="bi bi-bar-chart-fill"></i> Tampilkan
+                    </button>
+                </td>
             </tr>
             `;
         });
@@ -192,7 +204,8 @@ function showChart(index, element){
     const item = globalData[index];
 
     // 🔥 highlight row
-    document.querySelectorAll("tr").forEach(tr => tr.classList.remove("active-row"));
+    document.querySelectorAll("#historyBox tbody tr")
+        .forEach(tr => tr.classList.remove("active-row"));
     if(element){
         element.classList.add("active-row");
     }
