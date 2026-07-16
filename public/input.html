@@ -576,7 +576,7 @@ function loadHistory(){
 
             const date = new Date(item.created_at).toLocaleDateString();
 
-            labels.push(date);
+            labels.push([date, item.university_name]);
             totals.push(item.total_emission);
 
             html += `
