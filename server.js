@@ -49,6 +49,7 @@ const db = mysql.createPool({
             CREATE TABLE IF NOT EXISTS carbon_data (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT,
+                university_name VARCHAR(255),
                 electricity FLOAT,
                 bus_count INT,
                 bus_trip FLOAT,
@@ -232,6 +233,7 @@ app.post('/save-carbon', (req, res) => {
     }
 
     const {
+        universityName,
         electricity,
         busCount,
         busTrip,
@@ -250,15 +252,16 @@ app.post('/save-carbon', (req, res) => {
 
     const sql = `
         INSERT INTO carbon_data 
-        (user_id, electricity, bus_count, bus_trip, bus_distance,
+        (user_id, university_name, electricity, bus_count, bus_trip, bus_distance,
         car_count, car_distance,
         motor_count, motor_distance,
         electricity_emission, bus_emission, car_emission, motor_emission, total_emission)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sql, [
         req.session.user.id,
+        universityName,
         electricity,
         busCount,
         busTrip,

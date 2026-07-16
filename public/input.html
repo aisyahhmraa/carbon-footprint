@@ -194,6 +194,14 @@ Yuk hitung emisi listrik kampus kamu sekarang 👇
 
 <div class="form-box">
 
+<label class="form-label">Nama Perguruan Tinggi</label>
+<input
+    type="text"
+    id="universityName"
+    class="form-control mb-3"
+    placeholder="Masukkan nama perguruan tinggi"
+    required>
+    
 <label class="form-label">Total Penggunaan Listrik per Tahun (kWh)</label>
 <input type="number" id="electricity" class="form-control mb-3">
 
@@ -507,6 +515,8 @@ function saveData(){
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
+            universityName: document.getElementById("universityName").value,
+
             // 🔥 INPUT ASLI
             electricity: document.getElementById("electricity").value,
 
@@ -554,6 +564,7 @@ function loadHistory(){
         <tr>
         <th>Tanggal</th>
         <th>Total Emisi</th>
+        <th>Nama Perguruan Tinggi</th>
         <th>Aksi</th>
         </tr>
         </thead>
@@ -578,6 +589,7 @@ function loadHistory(){
             )" style="cursor:pointer">
 
                 <td>${date}</td>
+                <td>${item.university_name ?? '-'}</td>
                 <td><b>${item.total_emission} ton</b></td>
 
                 <td>
