@@ -545,6 +545,24 @@ function saveData(){
     });
 }
 
+function shortUniversityName(name){
+
+    if(!name) return "-";
+
+    const map = {
+        "Telkom University": "Telkom",
+        "Universitas Indonesia": "UI",
+        "Institut Teknologi Bandung": "ITB",
+        "Universitas Padjadjaran": "UNPAD",
+        "Universitas Gadjah Mada": "UGM",
+        "Universitas Diponegoro": "UNDIP",
+        "Universitas Muhammadiyah Semarang": "UMS",
+        "Universiti Selangor": "Unisel",
+    };
+
+    return map[name] || name;
+}
+
 function loadHistory(){
 
     fetch('/history')
@@ -576,7 +594,7 @@ function loadHistory(){
 
             const date = new Date(item.created_at).toLocaleDateString();
 
-            labels.push([date, item.university_name]);
+            labels.push([date, shortUniversityName(item.university_name)]);
             totals.push(item.total_emission);
 
             html += `
