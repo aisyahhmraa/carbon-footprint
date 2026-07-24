@@ -236,9 +236,20 @@ Yuk hitung emisi listrik kampus kamu sekarang 👇
 
         <div class="electricity-item mb-3">
 
-            <label class="fw-bold">
-            🏢 Gedung 1
-            </label>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+
+                <label class="fw-bold mb-0">
+                    🏢 Gedung 1
+                </label>
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger rounded-circle"
+                    style="display:none;">
+                    🗑
+                </button>
+
+            </div>
 
             <input
                 type="number"
@@ -493,27 +504,53 @@ function nextStep(step){
     document.getElementById("stepText").innerText=step;
 }
 
-function addElectricityInput(){
+function addElectricityInput() {
 
     electricityCount++;
-
     const container = document.getElementById("electricityContainer");
-
     const div = document.createElement("div");
-
     div.className = "electricity-item mb-3";
-
     div.innerHTML = `
-        <label>Gedung ${electricityCount}</label>
-
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="fw-bold mb-0">
+                🏢 Gedung ${electricityCount}
+            </label>
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-danger rounded-circle"
+                onclick="removeElectricityInput(this)"
+                title="Hapus Gedung">
+                🗑
+            </button>
+        </div>
         <input
             type="number"
             class="form-control electricity-input"
             placeholder="Masukkan penggunaan listrik (kWh)">
     `;
-
     container.appendChild(div);
+}
 
+function removeElectricityInput(button){
+    button.closest(".electricity-item").remove();
+    updateElectricityNumber();
+}
+
+function updateElectricityNumber(){
+    const items = document.querySelectorAll(".electricity-item");
+    electricityCount = items.length;
+    items.forEach((item,index)=>{
+        item.querySelector("label").innerHTML =
+        `🏢 Gedung ${index+1}`;
+    });
+
+    // Gedung pertama tidak bisa dihapus
+    items.forEach((item,index)=>{
+        const btn=item.querySelector("button");
+        if(btn){
+            btn.style.display=index===0?"none":"inline-block";
+        }
+    });
 }
 
 function calcElectricity() {
@@ -538,7 +575,7 @@ function calcElectricity() {
 
         <div class="col-md-4">
             <div class="card shadow-sm text-center p-3">
-                <h6>🏢 Gedung/Gardu</h6>
+                <h6>🏢 Gedung</h6>
                 <h3>${totalGedung}</h3>
             </div>
         </div>
@@ -650,7 +687,7 @@ function saveData(){
         totalElectricity += value;
 
         electricityDetails.push({
-            building_name: `Gedung/Gardu ${index + 1}`,
+            building_name: `Gedung ${index + 1}`,
             electricity: value
         });
 
