@@ -50,6 +50,8 @@ const db = mysql.createPool({
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT,
                 university_name VARCHAR(255),
+                month VARCHAR(20),
+                year INT,
                 electricity FLOAT,
                 bus_count INT,
                 bus_trip FLOAT,
@@ -64,6 +66,14 @@ const db = mysql.createPool({
                 motor_emission FLOAT,
                 total_emission FLOAT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS electricity_details (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                carbon_id INT,
+                building_name VARCHAR(255),
+                electricity FLOAT
             )
         `);
 
@@ -227,19 +237,23 @@ app.post('/save-carbon', (req, res) => {
         return res.status(401).send("Unauthorized");
     }
 
-    // 🔥 BATASI ROLE
     if (req.session.user.role !== 'admin') {
         return res.status(403).send("Hanya admin yang bisa input data");
     }
 
     const {
         universityName,
+        month,
         electricity,
+        electricityDetails,
+
         busCount,
         busTrip,
         busDistance,
+
         carCount,
         carDistance,
+
         motorCount,
         motorDistance,
 
@@ -250,39 +264,91 @@ app.post('/save-carbon', (req, res) => {
         totalEmission
     } = req.body;
 
+    const year = new Date().getFullYear();
+
     const sql = `
-        INSERT INTO carbon_data 
-        (user_id, university_name, electricity, bus_count, bus_trip, bus_distance,
-        car_count, car_distance,
-        motor_count, motor_distance,
-        electricity_emission, bus_emission, car_emission, motor_emission, total_emission)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO carbon_data
+        (
+            user_id,
+            university_name,
+            month,
+            year,
+            electricity,
+            bus_count,
+            bus_trip,
+            bus_distance,
+            car_count,
+            car_distance,
+            motor_count,
+            motor_distance,
+            electricity_emission,
+            bus_emission,
+            car_emission,
+            motor_emission,
+            total_emission
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sql, [
         req.session.user.id,
         universityName,
+        month,
+        year,
         electricity,
+
         busCount,
         busTrip,
         busDistance,
+
         carCount,
         carDistance,
+
         motorCount,
         motorDistance,
+
         electricityEmission,
         busEmission,
         carEmission,
         motorEmission,
         totalEmission
+
     ], (err, result) => {
 
         if (err) {
             console.error(err);
-            return res.send("Database error");
+            return res.status(500).send("Database error");
         }
 
-        res.send("Data berhasil disimpan!");
+        const carbonId = result.insertId;
+
+        // Kalau tidak ada detail gedung
+        if (!electricityDetails || electricityDetails.length === 0) {
+            return res.send("Data berhasil disimpan!");
+        }
+
+        const detailValues = electricityDetails.map(item => [
+            carbonId,
+            item.building_name,
+            item.electricity
+        ]);
+
+        db.query(
+            `INSERT INTO electricity_details (carbon_id, building_name, electricity)
+             VALUES ?`,
+            [detailValues],
+            (detailErr) => {
+
+                if (detailErr) {
+                    console.error(detailErr);
+                    return res.status(500).send("Gagal menyimpan detail listrik");
+                }
+
+                res.send("Data berhasil disimpan!");
+
+            }
+        );
+
     });
 
 });

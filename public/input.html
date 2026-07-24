@@ -194,42 +194,81 @@ Yuk hitung emisi listrik kampus kamu sekarang 👇
 
 <div class="form-box">
 
-<label class="form-label">Nama Perguruan Tinggi</label>
-<input
-    type="text"
-    id="universityName"
-    class="form-control mb-3"
-    placeholder="Masukkan nama perguruan tinggi"
-    required>
-    
-<label class="form-label">Penggunaan Listrik per Gedung/Gardu (kWh)</label>
+    <h5 class="mb-3">🏫 Informasi Kampus</h5>
 
-<div id="electricityContainer">
+    <label class="form-label">Nama Perguruan Tinggi</label>
 
-    <div class="electricity-item mb-3">
+    <input
+        type="text"
+        id="universityName"
+        class="form-control mb-3"
+        placeholder="Masukkan nama perguruan tinggi"
+        required>
 
-        <label>Gedung/Gardu 1</label>
+    <label class="form-label">Periode</label>
 
-        <input
-            type="number"
-            class="form-control electricity-input"
-            placeholder="Masukkan penggunaan listrik (kWh)">
-
-    </div>
+    <select id="month" class="form-select mb-3">
+        <option value="">-- Pilih Bulan --</option>
+        <option>Januari</option>
+        <option>Februari</option>
+        <option>Maret</option>
+        <option>April</option>
+        <option>Mei</option>
+        <option>Juni</option>
+        <option>Juli</option>
+        <option>Agustus</option>
+        <option>September</option>
+        <option>Oktober</option>
+        <option>November</option>
+        <option>Desember</option>
+    </select>
 
 </div>
 
-<button
-type="button"
-class="btn btn-outline-primary btn-sm mb-3"
-onclick="addElectricityInput()">
-+ Tambah Gedung/Gardu
-</button>
 
-<button class="btn-premium" onclick="calcElectricity()">Hitung Emisi</button>
-<button class="btn btn-outline-dark ms-2" onclick="nextStep(2)">Next →</button>
+<div class="form-box">
 
-<div id="result1" class="result-box d-none"></div>
+    <h5 class="mb-4">⚡ Data Penggunaan Listrik</h5>
+
+    <label class="form-label">Penggunaan Listrik per Gedung (kWh)</label>
+
+    <div id="electricityContainer">
+
+        <div class="electricity-item mb-3">
+
+            <label class="fw-bold">
+            🏢 Gedung 1
+            </label>
+
+            <input
+                type="number"
+                class="form-control electricity-input"
+                placeholder="Masukkan penggunaan listrik (kWh)">
+
+        </div>
+
+    </div>
+
+    <button
+        type="button"
+        class="btn btn-success mb-3"
+        onclick="addElectricityInput()">
+        + Tambah Gedung
+    </button>
+
+    <br>
+
+    <button class="btn-premium" onclick="calcElectricity()">
+        Hitung Emisi
+    </button>
+
+    <button class="btn btn-outline-dark ms-2" onclick="nextStep(2)">
+        Next →
+    </button>
+
+    <div id="result1" class="result-box d-none"></div>
+
+</div>
 
 </div>
 
@@ -477,13 +516,53 @@ function addElectricityInput(){
 
 }
 
-function calcElectricity(){
-    const electricity=parseFloat(document.getElementById("electricity").value)||0;
-    electricityEmission=(electricity/1000)*0.84;
+function calcElectricity() {
+
+    const inputs = document.querySelectorAll(".electricity-input");
+    const totalGedung = inputs.length;
+    let totalElectricity = 0;
+
+    inputs.forEach(input => {
+        totalElectricity += parseFloat(input.value) || 0;
+    });
+
+    electricityEmission = (totalElectricity / 1000) * 0.84;
 
     document.getElementById("result1").classList.remove("d-none");
-    document.getElementById("result1").innerHTML=
-    "⚡ "+electricityEmission.toFixed(2)+" metric tons CO₂ ";
+
+    document.getElementById("result1").innerHTML = `
+
+    <h5 class="mb-4">📊 Hasil Perhitungan</h5>
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center p-3">
+                <h6>🏢 Gedung/Gardu</h6>
+                <h3>${totalGedung}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center p-3">
+                <h6>⚡ Total Listrik</h6>
+                <h3>${totalElectricity.toLocaleString()}</h3>
+                <small>kWh</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center p-3">
+                <h6>🌿 Emisi Listrik</h6>
+                <h3>${electricityEmission.toFixed(2)}</h3>
+                <small>metric tons CO₂</small>
+            </div>
+        </div>
+
+    </div>
+
+    `;
+
 }
 
 function calcTransport(){
@@ -556,26 +635,66 @@ function saveData(){
 
     const total = electricityEmission + busEmission + carEmission + motorEmission;
 
-    fetch('/save-carbon',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-            universityName: document.getElementById("universityName").value,
+        // ==========================
+    // DATA LISTRIK DINAMIS
+    // ==========================
+    const electricityInputs = document.querySelectorAll(".electricity-input");
 
-            // 🔥 INPUT ASLI
-            electricity: document.getElementById("electricity").value,
+    let totalElectricity = 0;
+    let electricityDetails = [];
 
+    electricityInputs.forEach((input, index) => {
+
+        const value = parseFloat(input.value) || 0;
+
+        totalElectricity += value;
+
+        electricityDetails.push({
+            building_name: `Gedung/Gardu ${index + 1}`,
+            electricity: value
+        });
+
+    });
+
+// Validasi Nama Kampus
+const universityName = document.getElementById("universityName").value.trim();
+
+if (!universityName) {
+    alert("Silakan masukkan nama perguruan tinggi.");
+    return;
+}
+
+// Validasi Bulan
+const month = document.getElementById("month").value;
+
+if (!month) {
+    alert("Silakan pilih bulan.");
+    return;
+}
+    // ==========================
+    // SAVE DATA
+    // ==========================
+    fetch('/save-carbon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            universityName,
+            month,
+            // Total semua gedung
+            electricity: totalElectricity,
+            // Detail setiap gedung
+            electricityDetails,
+            // Transportasi
             busCount: document.getElementById("busCount").value,
             busTrip: document.getElementById("busTrip").value,
             busDistance: document.getElementById("busDistance").value,
-
             carCount: document.getElementById("carCount").value,
             carDistance: document.getElementById("carDistance").value,
-
             motorCount: document.getElementById("motorCount").value,
             motorDistance: document.getElementById("motorDistance").value,
-
-            // 🔥 HASIL
+            // Emisi
             electricityEmission,
             busEmission,
             carEmission,
@@ -583,10 +702,13 @@ function saveData(){
             totalEmission: total
         })
     })
-    .then(res=>res.text())
-    .then(data=>{
-        alert(data);
-        loadHistory();
+    .then(res => res.text())
+    .then(msg => {
+        alert(msg);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Terjadi kesalahan saat menyimpan data.");
     });
 }
 
