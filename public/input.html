@@ -202,8 +202,29 @@ Yuk hitung emisi listrik kampus kamu sekarang 👇
     placeholder="Masukkan nama perguruan tinggi"
     required>
     
-<label class="form-label">Total Penggunaan Listrik per Tahun (kWh)</label>
-<input type="number" id="electricity" class="form-control mb-3">
+<label class="form-label">Penggunaan Listrik per Gedung/Gardu (kWh)</label>
+
+<div id="electricityContainer">
+
+    <div class="electricity-item mb-3">
+
+        <label>Gedung/Gardu 1</label>
+
+        <input
+            type="number"
+            class="form-control electricity-input"
+            placeholder="Masukkan penggunaan listrik (kWh)">
+
+    </div>
+
+</div>
+
+<button
+type="button"
+class="btn btn-outline-primary btn-sm mb-3"
+onclick="addElectricityInput()">
++ Tambah Gedung/Gardu
+</button>
 
 <button class="btn-premium" onclick="calcElectricity()">Hitung Emisi</button>
 <button class="btn btn-outline-dark ms-2" onclick="nextStep(2)">Next →</button>
@@ -419,6 +440,7 @@ overflow-y:auto;   /* 🔥 AKTIFKAN SCROLL */
 <script>
 
 let electricityEmission=0;
+let electricityCount = 1;
 let busEmission=0;
 let carEmission=0;
 let motorEmission=0;
@@ -430,6 +452,29 @@ function nextStep(step){
     document.getElementById("step"+step).classList.add("active");
     document.getElementById("progressBar").style.width=(step*33)+"%";
     document.getElementById("stepText").innerText=step;
+}
+
+function addElectricityInput(){
+
+    electricityCount++;
+
+    const container = document.getElementById("electricityContainer");
+
+    const div = document.createElement("div");
+
+    div.className = "electricity-item mb-3";
+
+    div.innerHTML = `
+        <label>Gedung ${electricityCount}</label>
+
+        <input
+            type="number"
+            class="form-control electricity-input"
+            placeholder="Masukkan penggunaan listrik (kWh)">
+    `;
+
+    container.appendChild(div);
+
 }
 
 function calcElectricity(){
