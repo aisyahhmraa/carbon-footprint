@@ -393,24 +393,19 @@ app.post('/save-carbon', (req, res) => {
 // GET HISTORY DATA
 // ======================
 app.get('/history', (req, res) => {
-
     if (!req.session.user) {
         return res.status(401).send("Unauthorized");
     }
-
     const userId = req.session.user.id;
-
-    const sql = `
-        SELECT * FROM carbon_data 
-    `;
-
-    db.query(sql, (err, result) => {
-
+    const { type, value } = req.query;
+    let sql = `SELECT * FROM carbon_data WHERE 1=1`;
+    let params = [];
+    if(type === "monthly"){ sql += " AND month = ?"; params.push(value); }
+    db.query(sql, params, (err, result) => {
         if (err) {
             console.error(err);
             return res.send("Database error");
         }
-
         res.json(result);
     });
 
