@@ -315,39 +315,53 @@ Hitung emisi transportasi kampusmu sekarang 👇
 </div>
 
 <div class="form-box">
-
-<div class="row">
-
-<div class="col-md-4">
-<h6>🚌 Shuttle Bus</h6>
-<label class="form-label">Jumlah Bus</label>
-<input type="number" id="busCount" class="form-control mb-2">
-
-<label class="form-label">Trip per Hari</label>
-<input type="number" id="busTrip" class="form-control mb-2">
-
-<label class="form-label">Jarak per Hari (km)</label>
-<input type="number" id="busDistance" class="form-control mb-2">
+    <h5 class="mb-3">📅 Informasi Transportasi</h5>
+    <label class="form-label">Jumlah Hari Kerja</label>
+    <input
+        type="number"
+        id="workingDays"
+        class="form-control mb-3"
+        placeholder="Contoh: 20">
 </div>
 
-<div class="col-md-4">
-<h6>🚙 Car</h6>
-<label class="form-label">Jumlah Mobil</label>
-<input type="number" id="carCount" class="form-control mb-2">
-
-<label class="form-label">Jarak per Hari (km)</label>
-<input type="number" id="carDistance" class="form-control mb-2">
+<div class="form-box">
+    <h5 class="mb-3">🏍 Motor</h5>
+    <label class="fw-bold">Gate 1</label>
+    <input type="number" id="motorGate1" class="form-control mb-3">
+    <label class="fw-bold">Gate 4</label>
+    <input type="number" id="motorGate4" class="form-control mb-3">
+    <label class="fw-bold">Palasari</label>
+    <input type="number" id="motorPalasari" class="form-control mb-3">
+    <label class="fw-bold">Jarak Tempuh (km)</label>
+    <input type="number" id="motorDistance" class="form-control mb-3" placeholder="masukan jarak tempuh (km)">
 </div>
 
-<div class="col-md-4">
-<h6>🏍 Motorcycle</h6>
-<label class="form-label">Jumlah Motor</label>
-<input type="number" id="motorCount" class="form-control mb-2">
-
-<label class="form-label">Jarak per Hari (km)</label>
-<input type="number" id="motorDistance" class="form-control mb-2">
+<div class="form-box">
+    <h5 class="mb-3">🚗 Mobil</h5>
+    <label class="fw-bold">Gate 1</label>
+    <input type="number" id="carGate1" class="form-control mb-3">
+    <label class="fw-bold">Gate 2</label>
+    <input type="number" id="carGate2" class="form-control mb-3">
+    <label class="fw-bold">Gate 3</label>
+    <input type="number" id="carGate3" class="form-control mb-3">
+    <label class="fw-bold">Palasari</label>
+    <input type="number" id="carPalasari" class="form-control mb-3">
+    <label class="fw-bold">Jarak Tempuh (km)</label>
+    <input type="number" id="carDistance" class="form-control mb-3" placeholder="masukan jarak tempuh (km)">
 </div>
 
+<div class="form-box">
+    <h5 class="mb-3">🚌 Bus</h5>
+    <label class="fw-bold">Gate 1</label>
+    <input type="number" id="busGate1" class="form-control mb-3">
+    <label class="fw-bold">Gate 2</label>
+    <input type="number" id="busGate2" class="form-control mb-3">
+    <label class="fw-bold">Gate 3</label>
+    <input type="number" id="busGate3" class="form-control mb-3">
+    <label class="fw-bold">Palasari</label>
+    <input type="number" id="busPalasari" class="form-control mb-3">
+    <label class="fw-bold">Jarak Tempuh (km)</label>
+    <input type="number" id="busDistance" class="form-control mb-3" placeholder="masukan jarak tempuh (km)">
 </div>
 
 <button class="btn-premium mt-3" onclick="calcTransport()">Hitung Emisi Transport</button>
@@ -604,24 +618,51 @@ function calcElectricity() {
 
 function calcTransport(){
 
-    const busCount=parseFloat(document.getElementById("busCount").value)||0;
-    const busTrip=parseFloat(document.getElementById("busTrip").value)||0;
-    const busDistance=parseFloat(document.getElementById("busDistance").value)||0;
-    busEmission=((busCount*busTrip*busDistance*240)/100)*0.01;
+    // ==========================
+    // Hari Kerja
+    // ==========================
+    const workingDays = parseFloat(document.getElementById("workingDays").value) || 0;
 
-    const carCount=parseFloat(document.getElementById("carCount").value)||0;
-    const carDistance=parseFloat(document.getElementById("carDistance").value)||0;
-    carEmission=((carCount*2*carDistance*240)/100)*0.02;
+    // ==========================
+    // BUS
+    // ==========================
+    const busGate1 = parseFloat(document.getElementById("busGate1").value) || 0;
+    const busGate2 = parseFloat(document.getElementById("busGate2").value) || 0;
+    const busGate3 = parseFloat(document.getElementById("busGate3").value) || 0;
+    const busPalasari = parseFloat(document.getElementById("busPalasari").value) || 0;
+    const busTotal = busGate1 + busGate2 + busGate3 + busPalasari;
+    const busDistance = parseFloat(document.getElementById("busDistance").value) || 0;
+    busEmission = ((busTotal * 2 * busDistance * workingDays) / 100) * 0.01;
 
-    const motorCount=parseFloat(document.getElementById("motorCount").value)||0;
-    const motorDistance=parseFloat(document.getElementById("motorDistance").value)||0;
-    motorEmission=((motorCount*2*motorDistance*240)/100)*0.01;
+    // ==========================
+    // MOBIL
+    // ==========================
+    const carGate1 = parseFloat(document.getElementById("carGate1").value) || 0;
+    const carGate2 = parseFloat(document.getElementById("carGate2").value) || 0;
+    const carGate3 = parseFloat(document.getElementById("carGate3").value) || 0;
+    const carPalasari = parseFloat(document.getElementById("carPalasari").value) || 0;
+    const carTotal = carGate1 + carGate2 + carGate3 + carPalasari;
+    const carDistance = parseFloat(document.getElementById("carDistance").value) || 0;
+    carEmission = ((carTotal * 2 * carDistance * workingDays) / 100) * 0.02;
 
+    // ==========================
+    // MOTOR
+    // ==========================
+    const motorGate1 = parseFloat(document.getElementById("motorGate1").value) || 0;
+    const motorGate4 = parseFloat(document.getElementById("motorGate4").value) || 0;
+    const motorPalasari = parseFloat(document.getElementById("motorPalasari").value) || 0;
+    const motorTotal = motorGate1 + motorGate4 + motorPalasari;
+    const motorDistance = parseFloat(document.getElementById("motorDistance").value) || 0;
+    motorEmission = ((motorTotal * 2 * motorDistance * workingDays) / 100) * 0.01;
+
+    // ==========================
+    // HASIL
+    // ==========================
     document.getElementById("result2").classList.remove("d-none");
-    document.getElementById("result2").innerHTML=
-    "🚌 Bus: "+busEmission.toFixed(2)+" metric tons CO₂<br>"+
-    "🚙 Car: "+carEmission.toFixed(2)+" metric tons CO₂<br>"+
-    "🏍 Motorcycle: "+motorEmission.toFixed(2)+" metric tons CO₂";
+    document.getElementById("result2").innerHTML =
+        "🚌 Bus : " + busEmission.toFixed(2) + + " metric tons CO₂<br>" +
+        "🚗 Mobil : " + carEmission.toFixed(2) + " metric tons CO₂<br>" +
+        "🏍 Motor  : " + motorEmission.toFixed(2) + " metric tons CO₂";
 }
 
 function showTotal(){
@@ -724,12 +765,23 @@ if (!month) {
             // Detail setiap gedung
             electricityDetails,
             // Transportasi
-            busCount: document.getElementById("busCount").value,
-            busTrip: document.getElementById("busTrip").value,
+            workingDays: document.getElementById("workingDays").value,
+            // Bus
+            busGate1: document.getElementById("busGate1").value,
+            busGate2: document.getElementById("busGate2").value,
+            busGate3: document.getElementById("busGate3").value,
+            busPalasari: document.getElementById("busPalasari").value,
             busDistance: document.getElementById("busDistance").value,
-            carCount: document.getElementById("carCount").value,
+            // Mobil
+            carGate1: document.getElementById("carGate1").value,
+            carGate2: document.getElementById("carGate2").value,
+            carGate3: document.getElementById("carGate3").value,
+            carPalasari: document.getElementById("carPalasari").value,
             carDistance: document.getElementById("carDistance").value,
-            motorCount: document.getElementById("motorCount").value,
+            // Motor
+            motorGate1: document.getElementById("motorGate1").value,
+            motorGate4: document.getElementById("motorGate4").value,
+            motorPalasari: document.getElementById("motorPalasari").value,
             motorDistance: document.getElementById("motorDistance").value,
             // Emisi
             electricityEmission,

@@ -246,14 +246,26 @@ app.post('/save-carbon', (req, res) => {
         month,
         electricity,
         electricityDetails,
+        workingDays,
 
+        busGate1,
+        busGate2,
+        busGate3,
+        busPalasari,
         busCount,
         busTrip,
         busDistance,
 
+        carGate1,
+        carGate2,
+        carGate3,
+        carPalasari,
         carCount,
         carDistance,
 
+        motorGate1,
+        motorGate4,
+        motorPalasari,
         motorCount,
         motorDistance,
 
@@ -274,11 +286,23 @@ app.post('/save-carbon', (req, res) => {
             month,
             year,
             electricity,
+            working_days,
+            bus_gate1,
+            bus_gate2,
+            bus_gate3,
+            bus_palasari,
             bus_count,
             bus_trip,
             bus_distance,
+            car_gate1,
+            car_gate2,
+            car_gate3,
+            car_palasari,
             car_count,
             car_distance,
+            motor_gate1,
+            motor_gate4,
+            motor_palasari,
             motor_count,
             motor_distance,
             electricity_emission,
@@ -287,7 +311,7 @@ app.post('/save-carbon', (req, res) => {
             motor_emission,
             total_emission
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sql, [
@@ -296,14 +320,26 @@ app.post('/save-carbon', (req, res) => {
         month,
         year,
         electricity,
+        workingDays,
 
+        busGate1,
+        busGate2,
+        busGate3,
+        busPalasari,
         busCount,
         busTrip,
         busDistance,
 
+        carGate1,
+        carGate2,
+        carGate3,
+        carPalasari,
         carCount,
         carDistance,
 
+        motorGate1,
+        motorGate4,
+        motorPalasari,
         motorCount,
         motorDistance,
 
