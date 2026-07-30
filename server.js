@@ -486,16 +486,24 @@ app.put('/update-carbon/:id', (req, res) => {
     const { id } = req.params;
     const {
         electricity,
-        busCount,
-        busTrip,
+        workingDays,
+        // Bus
+        busGate1,
+        busGate2,
+        busGate3,
+        busPalasari,
         busDistance,
-
-        carCount,
+        // Mobil
+        carGate1,
+        carGate2,
+        carGate3,
+        carPalasari,
         carDistance,
-
-        motorCount,
+        // Motor
+        motorGate1,
+        motorGate4,
+        motorPalasari,
         motorDistance,
-
         electricityEmission,
         busEmission,
         carEmission,
@@ -505,38 +513,51 @@ app.put('/update-carbon/:id', (req, res) => {
     } = req.body;
 
     const sql = `
-        UPDATE carbon_data
-        SET
-
-            electricity = ?,
-            bus_count = ?,
-            bus_trip = ?,
-            bus_distance = ?,
-
-            car_count = ?,
-            car_distance = ?,
-
-            motor_count = ?,
-            motor_distance = ?,
-
-            electricity_emission = ?,
-            bus_emission = ?,
-            car_emission = ?,
-            motor_emission = ?,
-            total_emission = ?
-        WHERE id = ?
+    UPDATE carbon_data
+    SET
+        electricity = ?,
+        working_days = ?,
+        bus_gate1 = ?,
+        bus_gate2 = ?,
+        bus_gate3 = ?,
+        bus_palasari = ?,
+        bus_distance = ?,
+        car_gate1 = ?,
+        car_gate2 = ?,
+        car_gate3 = ?,
+        car_palasari = ?,
+        car_distance = ?,
+        motor_gate1 = ?,
+        motor_gate4 = ?,
+        motor_palasari = ?,
+        motor_distance = ?,
+        electricity_emission = ?,
+        bus_emission = ?,
+        car_emission = ?,
+        motor_emission = ?,
+        total_emission = ?
+    WHERE id = ?
     `;
 
     db.query(sql, [
         electricity,
-        busCount,
-        busTrip,
+        workingDays,
+
+        busGate1,
+        busGate2,
+        busGate3,
+        busPalasari,
         busDistance,
 
-        carCount,
+        carGate1,
+        carGate2,
+        carGate3,
+        carPalasari,
         carDistance,
 
-        motorCount,
+        motorGate1,
+        motorGate4,
+        motorPalasari,
         motorDistance,
 
         electricityEmission,

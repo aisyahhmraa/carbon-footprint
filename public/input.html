@@ -18,12 +18,14 @@ body{ background:linear-gradient(135deg,#eef2f9,#f8fbff); font-family:'Segoe UI'
 .title{ font-weight:700; color:#1b2a49;}
 .highlight{ color:#1b2a49; font-weight:600; }
 .form-box{ background:#ffffff; padding:30px; border-radius:20px; box-shadow:0 15px 35px rgba(0,0,0,0.08); margin-top:40px; }
+
 .btn-premium{ background:#1b2a49; color:white; border:none; padding:12px 30px; border-radius:50px; transition:0.3s; }
 .btn-premium:hover{ background:#0f1b33; transform:translateY(-2px); }
 .result-box{ background:#eef3ff; padding:20px; border-radius:15px; margin-top:20px; font-weight:600; }
 .progress{ height:10px; border-radius:10px; margin-top:30px; }
 .step-indicator{ text-align:center; margin-top:15px; font-weight:500; color:#555; }
-
+.dashboard-card{ background:#ffffff; border-radius:20px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,0.08); height:100%; }
+.dashboard-card h5{ font-weight:700; color:#1b2a49; margin-bottom:20px; }
 /* TAMBAHAN TABLE */
 table{ border-radius:12px; overflow:hidden; }
 table tbody tr:hover{ background:#eef3ff; transform:scale(1.01); transition:0.2s; }
@@ -37,6 +39,7 @@ table td, table th{ padding:12px; text-align:center; }
 #todayChart,
 #historyChart{ width:100% !important; min-height:320px; }
 #historyBox{ max-height:320px; overflow-y:auto; }
+#finalResult{ min-height:320px; }
 .card{ border-radius:18px; }
 .card-body{ padding:30px; }
 
@@ -315,194 +318,92 @@ Hitung emisi transportasi kampusmu sekarang 👇
 
 <!-- ================= STEP 3 TOTAL ================= -->
 <div id="step3" class="section">
+<div class="hero-box">
+    <h2 class="title">📊 Total Emisi Karbon</h2>
+    <p>
+        Total emisi dihitung dari penggunaan listrik ditambah seluruh emisi transportasi.
+        Hasil ini membantu merancang strategi efisiensi energi dan pengurangan jejak karbon
+        menuju Green Campus.
+    </p>
+    <!-- FILTER -->
+    <div class="form-box mb-4">
+        <h5 class="mb-3">📅 Filter Data</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label fw-bold"> Periode </label>
+                <select
+                    id="periodType"
+                    class="form-select"
+                    onchange="changePeriod()">
+                    <option value="monthly">Bulanan</option>
+                    <option value="quarterly">Triwulan</option>
+                    <option value="semester">Semester</option>
+                    <option value="yearly">Tahunan</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label id="periodLabel" class="form-label fw-bold"> Bulan </label>
+                <select
+                    id="periodValue"
+                    class="form-select">
 
-<div class="row align-items-center g-5 hero-box">
-
-<!-- KIRI (TEKS) -->
-<div class="col-md-6">
-
-<h2 class="title">📊 Total Emisi Karbon </h2>
-
-<p>
-Total emisi dihitung dari penggunaan listrik ditambah seluruh emisi transportasi. Hasil ini membantu merancang strategi efisiensi energi dan pengurangan jejak karbon menuju Green Campus.
-</p>
-
-<div class="form-box mb-4">
-    <h5 class="mb-3">📅 Filter Data</h5>
-    <div class="row">
-        <!-- Periode -->
-        <div class="col-md-6">
-            <label class="form-label fw-bold"> Periode </label>
-            <select id="periodType" class="form-select" onchange="changePeriod()">
-                <option value="monthly"> Bulanan </option>
-                <option value="quarterly"> Triwulan </option>
-                <option value="semester"> Semester </option>
-                <option value="yearly"> Tahunan </option>
-            </select>
-        </div>
-        <!-- Pilihan -->
-        <div class="col-md-6">
-            <label id="periodLabel" class="form-label fw-bold"> Bulan </label>
-            <select id="periodValue" class="form-select">
-                <option value="January">Januari</option>
-                <option value="February">Februari</option>
-                <option value="March">Maret</option>
-                <option value="April">April</option>
-                <option value="May">Mei</option>
-                <option value="June">Juni</option>
-                <option value="July">Juli</option>
-                <option value="August">Agustus</option>
-                <option value="September">September</option>
-                <option value="October">Oktober</option>
-                <option value="November">November</option>
-                <option value="December">Desember</option>
-            </select>
-        </div>
-    </div>
-</div>
-
-<div class="d-flex gap-2 mt-3">
-    <button class="btn btn-outline-secondary"
-        onclick="nextStep(2)">
-        ← Back
-    </button>
-    <button class="btn-premium"
-        onclick="showTotal()">
-        Tampilkan Data
-    </button>
-    <button class="btn btn-success"
-        onclick="saveData()">
-        Save
-    </button>
-</div>
-
-<div class="row mt-4 g-4">
-    <!-- CARD TOTAL -->
-    <div class="col-lg-6">
-        <div class="form-box h-100">
-            <h5 class="mb-3"> 🌱 Total Emisi </h5>
-            <div id="finalResult" class="d-none"></div>
+                    <option value="January">Januari</option>
+                    <option value="February">Februari</option>
+                    <option value="March">Maret</option>
+                    <option value="April">April</option>
+                    <option value="May">Mei</option>
+                    <option value="June">Juni</option>
+                    <option value="July">Juli</option>
+                    <option value="August">Agustus</option>
+                    <option value="September">September</option>
+                    <option value="October">Oktober</option>
+                    <option value="November">November</option>
+                    <option value="December">Desember</option>
+                </select>
+            </div>
         </div>
     </div>
-    <!-- BREAKDOWN -->
-    <div class="col-lg-6">
-        <div class="form-box h-100">
-            <h5 class="mb-3"> 📈 Emission Breakdown </h5>
-            <canvas id="todayChart"></canvas>
+    <!-- BUTTON -->
+    <div class="d-flex gap-2 mb-4">
+        <button class="btn btn-outline-secondary" onclick="nextStep(2)"> ← Back </button>
+        <button class="btn-premium" onclick="showTotal()"> Tampilkan Data </button>
+        <button class="btn btn-success" onclick="saveData()">Save</button>
+    </div>
+    <!-- BARIS 1 -->
+    <div class="row g-4">
+        <!-- TOTAL -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <h5 class="mb-3"> 🌱 Total Emisi </h5>
+                <div id="finalResult" class="d-none"></div>
+            </div>
+        </div>
+        <!-- BREAKDOWN -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <h5 class="mb-3"> 📈 Emission Breakdown </h5>
+                <canvas id="todayChart"></canvas>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="row mt-2 g-4">
-    <!-- HISTORY CHART -->
-    <div class="col-lg-6">
-        <div class="form-box h-100">
-            <h5 class="mb-3"> 📊 Total Emission History </h5>
-            <canvas id="historyChart"></canvas>
+    <!-- BARIS 2 -->
+    <div class="row g-4 mt-1">
+        <!-- HISTORY CHART -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <h5 class="mb-3"> 📊 Total Emission History </h5>
+                <canvas id="historyChart"></canvas>
+            </div>
         </div>
-    </div>
-
-    <!-- HISTORY TABLE -->
-    <div class="col-lg-6">
-        <div class="form-box h-100">
-            <h5 class="mb-3"> 📋 History Data </h5>
-            <div id="historyBox"></div>
+        <!-- HISTORY TABLE -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <h5 class="mb-3"> 📋 History Data </h5>
+                <div id="historyBox"></div>
+            </div>
         </div>
     </div>
 </div>
-
-</div>
-
-<!-- KANAN (GAMBAR + CHART + HISTORY) -->
-<div class="col-md-6 text-center">
-<h5 class="mt-4">📋 History Data</h5>
-<div id="historyBox" class="mt-3"></div>
-</div>
-</div>
-</div>
-</div>
-
-<!-- OVERLAY -->
-<div id="overlay" onclick="closeForm()" style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.5);
-z-index:998;
-"></div>
-
-<!-- FORM EDIT -->
-<div id="editFormBox" style="
-display:none;
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
-background:white;
-padding:30px;
-border-radius:15px;
-box-shadow:0 10px 30px rgba(0,0,0,0.2);
-z-index:999;
-
-width:900px;
-max-width:95%;
-
-max-height:90vh;   /* 🔥 BATAS TINGGI */
-overflow-y:auto;   /* 🔥 AKTIFKAN SCROLL */
-">
-
-    <div class="form-box" style="position:relative;">
-        <!-- TOMBOL CLOSE -->
-        <button onclick="closeForm()" style="
-        position:absolute;
-        top:-10px;
-        right:-10px;
-        border:none;
-        background:red;
-        color:white;
-        border-radius:50%;
-        width:30px;
-        height:30px;
-        cursor:pointer;
-        ">✖</button>
-
-        <h4>✏️ Edit Data</h4>
-
-        <input type="hidden" id="editId">
-
-        <label>Electricity (kWh)</label>
-        <input type="number" id="editElectricity" class="form-control mb-2" oninput="autoCalculateTotal()">
-
-        <h6 class="mt-3">🚌 Bus</h6>
-        <label class="form-label">Jumlah Bus</label>
-        <input type="number" id="editBusCount" class="form-control mb-2" oninput="autoCalculateTotal()">
-        <label class="form-label">Trip per Hari</label>
-        <input type="number" id="editBusTrip" class="form-control mb-2" oninput="autoCalculateTotal()">
-        <label class="form-label">Jarak (km)</label>
-        <input type="number" id="editBusDistance" class="form-control mb-3" oninput="autoCalculateTotal()">
-
-        <h6 class="mt-3">🚙 Car</h6>
-        <label class="form-label">Jumlah Mobil</label>
-        <input type="number" id="editCarCount" class="form-control mb-2" oninput="autoCalculateTotal()">
-        <label class="form-label">Jarak (km)</label>
-        <input type="number" id="editCarDistance" class="form-control mb-3" oninput="autoCalculateTotal()">
-
-        <h6 class="mt-3">🏍 Motor</h6>
-        <label class="form-label">Jumlah Motor</label>
-        <input type="number" id="editMotorCount" class="form-control mb-2" oninput="autoCalculateTotal()">
-        <label class="form-label">Jarak (km)</label>
-        <input type="number" id="editMotorDistance" class="form-control mb-3" oninput="autoCalculateTotal()">
-
-        <label class="form-label">Total Emisi</label>
-        <input type="number" id="editTotal" class="form-control mb-3" readonly>
-
-        <button onclick="updateData()" class="btn btn-success">Update</button>
-
-    </div>
-
 </div>
 
 <script>
@@ -950,6 +851,42 @@ if (!month) {
                 `Data ${universityName} bulan ${month} sudah ada.\n\nApakah ingin memperbarui data tersebut?`
             );
             if (!update) return;
+            fetch('/update-carbon/' + data.id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    electricity: totalElectricity,
+                    workingDays: document.getElementById("workingDays").value,
+                    busGate1: document.getElementById("busGate1").value,
+                    busGate2: document.getElementById("busGate2").value,
+                    busGate3: document.getElementById("busGate3").value,
+                    busPalasari: document.getElementById("busPalasari").value,
+                    busDistance: document.getElementById("busDistance").value,
+                    carGate1: document.getElementById("carGate1").value,
+                    carGate2: document.getElementById("carGate2").value,
+                    carGate3: document.getElementById("carGate3").value,
+                    carPalasari: document.getElementById("carPalasari").value,
+                    carDistance: document.getElementById("carDistance").value,
+                    motorGate1: document.getElementById("motorGate1").value,
+                    motorGate4: document.getElementById("motorGate4").value,
+                    motorPalasari: document.getElementById("motorPalasari").value,
+                    motorDistance: document.getElementById("motorDistance").value,
+                    electricityEmission,
+                    busEmission,
+                    carEmission,
+                    motorEmission,
+                    totalEmission: total
+                })
+            })
+            .then(res => res.text())
+            .then(msg => {
+                alert(msg);
+                loadHistory();
+                showTotal();
+                changePeriod();
+            });
         }
     })
     .catch(err => {
