@@ -237,7 +237,7 @@ app.post('/save-carbon', (req, res) => {
         return res.status(401).send("Unauthorized");
     }
 
-    if (req.session.user.role !== 'admin') {
+    if (req.session.user.role !== "admin") {
         return res.status(403).send("Hanya admin yang bisa input data");
     }
 
@@ -247,7 +247,7 @@ app.post('/save-carbon', (req, res) => {
         electricity,
         electricityDetails,
         workingDays,
-
+        // Bus
         busGate1,
         busGate2,
         busGate3,
@@ -255,139 +255,169 @@ app.post('/save-carbon', (req, res) => {
         busCount,
         busTrip,
         busDistance,
-
+        // Mobil
         carGate1,
         carGate2,
         carGate3,
         carPalasari,
         carCount,
         carDistance,
-
+        // Motor
         motorGate1,
         motorGate4,
         motorPalasari,
         motorCount,
         motorDistance,
-
+        // Emisi
         electricityEmission,
         busEmission,
         carEmission,
         motorEmission,
         totalEmission
+
     } = req.body;
 
     const year = new Date().getFullYear();
 
-    const sql = `
-        INSERT INTO carbon_data
-        (
-            user_id,
-            university_name,
+    // CEK DATA SUDAH ADA?
+    const checkSql = `
+        SELECT id
+        FROM carbon_data
+        WHERE university_name = ?
+          AND month = ?
+          AND year = ?
+    `;
+
+    db.query(checkSql, [universityName, month, year], (checkErr, checkResult) => {
+        if (checkErr) {
+            console.error(checkErr);
+            return res.status(500).send("Database error");
+        }
+        // Jika sudah ada kirim id ke frontend
+        if (checkResult.length > 0) {
+            return res.json({
+                exists: true,
+                id: checkResult[0].id
+            });
+
+        }
+
+        // INSERT DATA BARU
+        const sql = `
+            INSERT INTO carbon_data
+            (
+                user_id,
+                university_name,
+                month,
+                year,
+                electricity,
+                working_days,
+
+                bus_gate1,
+                bus_gate2,
+                bus_gate3,
+                bus_palasari,
+                bus_count,
+                bus_trip,
+                bus_distance,
+
+                car_gate1,
+                car_gate2,
+                car_gate3,
+                car_palasari,
+                car_count,
+                car_distance,
+
+                motor_gate1,
+                motor_gate4,
+                motor_palasari,
+                motor_count,
+                motor_distance,
+
+                electricity_emission,
+                bus_emission,
+                car_emission,
+                motor_emission,
+                total_emission
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(sql, [
+
+            req.session.user.id,
+            universityName,
             month,
             year,
             electricity,
-            working_days,
-            bus_gate1,
-            bus_gate2,
-            bus_gate3,
-            bus_palasari,
-            bus_count,
-            bus_trip,
-            bus_distance,
-            car_gate1,
-            car_gate2,
-            car_gate3,
-            car_palasari,
-            car_count,
-            car_distance,
-            motor_gate1,
-            motor_gate4,
-            motor_palasari,
-            motor_count,
-            motor_distance,
-            electricity_emission,
-            bus_emission,
-            car_emission,
-            motor_emission,
-            total_emission
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            workingDays,
 
-    db.query(sql, [
-        req.session.user.id,
-        universityName,
-        month,
-        year,
-        electricity,
-        workingDays,
+            busGate1,
+            busGate2,
+            busGate3,
+            busPalasari,
+            busCount,
+            busTrip,
+            busDistance,
 
-        busGate1,
-        busGate2,
-        busGate3,
-        busPalasari,
-        busCount,
-        busTrip,
-        busDistance,
+            carGate1,
+            carGate2,
+            carGate3,
+            carPalasari,
+            carCount,
+            carDistance,
 
-        carGate1,
-        carGate2,
-        carGate3,
-        carPalasari,
-        carCount,
-        carDistance,
+            motorGate1,
+            motorGate4,
+            motorPalasari,
+            motorCount,
+            motorDistance,
 
-        motorGate1,
-        motorGate4,
-        motorPalasari,
-        motorCount,
-        motorDistance,
+            electricityEmission,
+            busEmission,
+            carEmission,
+            motorEmission,
+            totalEmission
 
-        electricityEmission,
-        busEmission,
-        carEmission,
-        motorEmission,
-        totalEmission
-
-    ], (err, result) => {
-
-        if (err) {
-            console.error(err);
-            return res.status(500).send("Database error");
-        }
-
-        const carbonId = result.insertId;
-
-        // Kalau tidak ada detail gedung
-        if (!electricityDetails || electricityDetails.length === 0) {
-            return res.send("Data berhasil disimpan!");
-        }
-
-        const detailValues = electricityDetails.map(item => [
-            carbonId,
-            item.building_name,
-            item.electricity
-        ]);
-
-        db.query(
-            `INSERT INTO electricity_details (carbon_id, building_name, electricity)
-             VALUES ?`,
-            [detailValues],
-            (detailErr) => {
-
-                if (detailErr) {
-                    console.error(detailErr);
-                    return res.status(500).send("Gagal menyimpan detail listrik");
-                }
-
-                res.send("Data berhasil disimpan!");
-
+        ], (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send("Database error");
             }
-        );
+            const carbonId = result.insertId;
+            // TIDAK ADA DETAIL GEDUNG
+            if (!electricityDetails || electricityDetails.length === 0) {
+                return res.json({
+                    success: true
+                });
+            }
+            // SIMPAN DETAIL GEDUNG
+            const detailValues = electricityDetails.map(item => [
 
+                carbonId,
+                item.building_name,
+                item.electricity
+
+            ]);
+            db.query(
+                `
+                INSERT INTO electricity_details
+                (carbon_id, building_name, electricity)
+                VALUES ?
+                `,
+                [detailValues],
+                (detailErr) => {
+                    if (detailErr) {
+                        console.error(detailErr);
+                        return res.status(500).send("Gagal menyimpan detail listrik");
+                    }
+                    return res.json({ success: true });
+                }
+            );
+        });
     });
-
 });
+
 
 // ======================
 // GET HISTORY DATA
@@ -445,7 +475,6 @@ app.delete('/delete-carbon/:id', (req, res) => {
 // UPDATE CARBON DATA
 // ======================
 app.put('/update-carbon/:id', (req, res) => {
-
     if (!req.session.user) {
         return res.status(401).send("Unauthorized");
     }
@@ -455,9 +484,7 @@ app.put('/update-carbon/:id', (req, res) => {
     }
 
     const { id } = req.params;
-
     const {
-
         electricity,
         busCount,
         busTrip,
@@ -497,12 +524,10 @@ app.put('/update-carbon/:id', (req, res) => {
             car_emission = ?,
             motor_emission = ?,
             total_emission = ?
-
         WHERE id = ?
     `;
 
     db.query(sql, [
-
         electricity,
         busCount,
         busTrip,
@@ -521,16 +546,12 @@ app.put('/update-carbon/:id', (req, res) => {
         totalEmission,
 
         id
-
     ], (err) => {
-
         if (err) {
             console.error(err);
             return res.send("Database error");
         }
-
         res.send("Data berhasil diupdate!");
-
     });
 
 });

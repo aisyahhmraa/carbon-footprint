@@ -9,138 +9,36 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{
-    background:linear-gradient(135deg,#eef2f9,#f8fbff);
-    font-family:'Segoe UI', sans-serif;
-}
-
-.section{
-    display:none;
-    opacity:0;
-    transition:0.5s ease;
-    padding:80px 0;
-}
-
-.section.active{
-    display:block;
-    opacity:1;
-}
-
-.hero-box{
-    background:white;
-    border-radius:20px;
-    padding:40px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.08);
-    position:relative;
-    overflow:hidden;
-}
-
-.hero-box::before{
-    content:"";
-    position:absolute;
-    top:-50px;
-    right:-50px;
-    width:150px;
-    height:150px;
-    background:#1b2a49;
-    opacity:0.05;
-    border-radius:50%;
-}
-
-.hero-img{
-    max-width:100%;
-    border-radius:20px;
-}
-
-.title{
-    font-weight:700;
-    color:#1b2a49;
-}
-
-.highlight{
-    color:#1b2a49;
-    font-weight:600;
-}
-
-.form-box{
-    background:#ffffff;
-    padding:30px;
-    border-radius:20px;
-    box-shadow:0 15px 35px rgba(0,0,0,0.08);
-    margin-top:40px;
-}
-
-.btn-premium{
-    background:#1b2a49;
-    color:white;
-    border:none;
-    padding:12px 30px;
-    border-radius:50px;
-    transition:0.3s;
-}
-
-.btn-premium:hover{
-    background:#0f1b33;
-    transform:translateY(-2px);
-}
-
-.result-box{
-    background:#eef3ff;
-    padding:20px;
-    border-radius:15px;
-    margin-top:20px;
-    font-weight:600;
-}
-
-.progress{
-    height:10px;
-    border-radius:10px;
-    margin-top:30px;
-}
-
-.step-indicator{
-    text-align:center;
-    margin-top:15px;
-    font-weight:500;
-    color:#555;
-}
+body{ background:linear-gradient(135deg,#eef2f9,#f8fbff); font-family:'Segoe UI', sans-serif; }
+.section{ display:none; opacity:0; transition:0.5s ease; padding:80px 0; }
+.section.active{ display:block; opacity:1;}
+.hero-box{ background:white; border-radius:20px; padding:40px;box-shadow:0 15px 40px rgba(0,0,0,0.08); position:relative; overflow:hidden; }
+.hero-box::before{ content:""; position:absolute; top:-50px; right:-50px; width:150px;height:150px; background:#1b2a49; opacity:0.05; border-radius:50%; }
+.hero-img{ max-width:100%; border-radius:20px; }
+.title{ font-weight:700; color:#1b2a49;}
+.highlight{ color:#1b2a49; font-weight:600; }
+.form-box{ background:#ffffff; padding:30px; border-radius:20px; box-shadow:0 15px 35px rgba(0,0,0,0.08); margin-top:40px; }
+.btn-premium{ background:#1b2a49; color:white; border:none; padding:12px 30px; border-radius:50px; transition:0.3s; }
+.btn-premium:hover{ background:#0f1b33; transform:translateY(-2px); }
+.result-box{ background:#eef3ff; padding:20px; border-radius:15px; margin-top:20px; font-weight:600; }
+.progress{ height:10px; border-radius:10px; margin-top:30px; }
+.step-indicator{ text-align:center; margin-top:15px; font-weight:500; color:#555; }
 
 /* TAMBAHAN TABLE */
-table{
-    border-radius:12px;
-    overflow:hidden;
-}
+table{ border-radius:12px; overflow:hidden; }
+table tbody tr:hover{ background:#eef3ff; transform:scale(1.01); transition:0.2s; }
+table td, table th{ padding:12px; text-align:center; }
 
-table tbody tr:hover{
-    background:#eef3ff;
-    transform:scale(1.01);
-    transition:0.2s;
-}
+#editFormBox::-webkit-scrollbar { width:8px; }
+#editFormBox::-webkit-scrollbar-thumb { background:#1b2a49; border-radius:10px; }
+#editFormBox { opacity:0; transform:translate(-50%, -60%); transition:all 0.3s ease; }
+#editFormBox.show { opacity:1; transform:translate(-50%, -50%); }
 
-table td, table th{
-    padding:12px;
-    text-align:center;
-}
-
-#editFormBox::-webkit-scrollbar {
-    width:8px;
-}
-
-#editFormBox::-webkit-scrollbar-thumb {
-    background:#1b2a49;
-    border-radius:10px;
-}
-
-#editFormBox {
-    opacity:0;
-    transform:translate(-50%, -60%);
-    transition:all 0.3s ease;
-}
-
-#editFormBox.show {
-    opacity:1;
-    transform:translate(-50%, -50%);
-}
+#todayChart,
+#historyChart{ width:100% !important; min-height:320px; }
+#historyBox{ max-height:320px; overflow-y:auto; }
+.card{ border-radius:18px; }
+.card-body{ padding:30px; }
 
 </style>
 </head>
@@ -478,12 +376,40 @@ Total emisi dihitung dari penggunaan listrik ditambah seluruh emisi transportasi
     </button>
 </div>
 
-<div id="finalResult" class="result-box d-none"></div>
-<h5 class="mt-4">📈 Emission Breakdown</h5>
-<canvas id="todayChart" class="mt-3"></canvas>
+<div class="row mt-4 g-4">
+    <!-- CARD TOTAL -->
+    <div class="col-lg-6">
+        <div class="form-box h-100">
+            <h5 class="mb-3"> 🌱 Total Emisi </h5>
+            <div id="finalResult" class="d-none"></div>
+        </div>
+    </div>
+    <!-- BREAKDOWN -->
+    <div class="col-lg-6">
+        <div class="form-box h-100">
+            <h5 class="mb-3"> 📈 Emission Breakdown </h5>
+            <canvas id="todayChart"></canvas>
+        </div>
+    </div>
+</div>
 
-<h5 class="mt-4">📈 Total Emission History</h5>
-<canvas id="historyChart" class="mt-3"></canvas>
+<div class="row mt-2 g-4">
+    <!-- HISTORY CHART -->
+    <div class="col-lg-6">
+        <div class="form-box h-100">
+            <h5 class="mb-3"> 📊 Total Emission History </h5>
+            <canvas id="historyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- HISTORY TABLE -->
+    <div class="col-lg-6">
+        <div class="form-box h-100">
+            <h5 class="mb-3"> 📋 History Data </h5>
+            <div id="historyBox"></div>
+        </div>
+    </div>
+</div>
 
 </div>
 
@@ -813,7 +739,7 @@ function showTotal(){
     const transportEmission = busEmission + carEmission + motorEmission;
     document.getElementById("finalResult").classList.remove("d-none");
     document.getElementById("finalResult").innerHTML = `
-    <div class="row g-3">
+    <div class="row g-4">
         <div class="col-md-4">
             <div class="card shadow border-success h-100">
                 <div class="card-body text-center">
@@ -931,10 +857,8 @@ function changePeriod() {
 changePeriod();
 
 function saveData(){
-
     const total = electricityEmission + busEmission + carEmission + motorEmission;
-
-        // ==========================
+    // ==========================
     // DATA LISTRIK DINAMIS
     // ==========================
     const electricityInputs = document.querySelectorAll(".electricity-input");
@@ -1012,9 +936,21 @@ if (!month) {
             totalEmission: total
         })
     })
-    .then(res => res.text())
-    .then(msg => {
-        alert(msg);
+    .then(res => res.json())
+    .then(async data => {
+        // DATA BERHASIL DISIMPAN
+        if (data.success) {
+            alert("✅ Data berhasil disimpan!");
+            loadHistory();
+            return;
+        }
+        // DATA SUDAH ADA
+        if (data.exists) {
+            const update = confirm(
+                `Data ${universityName} bulan ${month} sudah ada.\n\nApakah ingin memperbarui data tersebut?`
+            );
+            if (!update) return;
+        }
     })
     .catch(err => {
         console.error(err);
