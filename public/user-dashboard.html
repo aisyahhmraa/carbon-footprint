@@ -72,6 +72,28 @@ tr:hover {
 
 <div class="container-box">
 
+<div class="container-box mb-4">
+    <h5 class="mb-3">📅 Filter Data</h5>
+    <div class="row">
+        <div class="col-md-5">
+            <label class="form-label fw-bold">Periode</label>
+            <select id="periodType" class="form-select" onchange="changePeriod()">
+                <option value="monthly">Bulanan</option>
+                <option value="quarterly">Triwulan</option>
+                <option value="semester">Semester</option>
+                <option value="yearly">Tahunan</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label id="periodLabel" class="form-label fw-bold"> Bulan </label>
+            <select id="periodValue" class="form-select"> </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-primary w-100" onclick="loadHistory()"> Tampilkan </button>
+        </div>
+    </div>
+</div>
+
 <h4 class="d-flex align-items-center gap-2">
     <img src="total.png" width="35">
     Total Emisi Karbon
@@ -120,11 +142,61 @@ let totalChart = null;
 let activeButton = null;
 
 // ======================
+// change period
+// ======================
+function changePeriod(){
+    const type = document.getElementById("periodType").value;
+    const label = document.getElementById("periodLabel");
+    const select = document.getElementById("periodValue");
+    select.innerHTML = "";
+    if(type==="monthly"){
+        label.innerText="Bulan";
+        const months=[
+            "Januari","Februari","Maret","April","Mei","Juni",
+            "Juli","Agustus","September","Oktober","November","Desember"
+        ];
+        months.forEach(m=>{
+            select.innerHTML+=`
+            <option value="${m}">
+                ${m}
+            </option>
+            `;
+        });
+    }
+    else if(type==="quarterly"){
+        label.innerText="Triwulan";
+        select.innerHTML=`
+        <option value="Q1">Q1 (Jan-Mar)</option>
+        <option value="Q2">Q2 (Apr-Jun)</option>
+        <option value="Q3">Q3 (Jul-Sep)</option>
+        <option value="Q4">Q4 (Okt-Des)</option>
+        `;
+    }
+    else if(type==="semester"){
+        label.innerText="Semester";
+        select.innerHTML=`
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+        `;
+    }
+    else{
+        label.innerText="Tahun";
+        const year=new Date().getFullYear();
+        select.innerHTML=`
+        <option value="${year}">
+            ${year}
+        </option>
+        `;
+    }
+}
+
+// ======================
 // LOAD DATA
 // ======================
 function loadHistory(){
-
-    fetch('/history')
+    const type = document.getElementById("periodType").value;
+    const value = document.getElementById("periodValue").value;
+    fetch(`/history?type=${type}&value=${value}`)
     .then(res => res.json())
     .then(data => {
 
@@ -140,7 +212,7 @@ function loadHistory(){
         <table class="table table-bordered">
         <thead>
         <tr>
-            <th>Tanggal</th>
+            <th>Periode</th>
             <th>Nama Perguruan Tinggi</th>
             <th>Total Emisi</th>
             <th>Aksi</th>
@@ -151,21 +223,18 @@ function loadHistory(){
 
         data.forEach((item, index) => {
 
-            const date = item.created_at 
-                ? new Date(item.created_at).toLocaleDateString()
-                : "Tidak ada tanggal";
-
+            const periode = `${item.month} ${item.year}`;
             const total = Number(item.total_emission) || 0;
 
             totalAll += total;
 
             // 🔥 masukin ke chart total
-            labels.push([date, item.university_name]);
+            labels.push([periode, item.university_name]);
             totals.push(total);
 
             html += `
             <tr>
-                <td>${date}</td>
+                <td>${periode}</td>
                 <td>${item.university_name ?? '-'}</td>
                 <td><b>${total} ton</b></td>
 
@@ -279,7 +348,7 @@ function showChart(index, element,  button){
     document.getElementById("selectedInfo").innerHTML =
         `📍 Menampilkan data:
         <b>${item.university_name ?? "-"}</b>
-        | ${date}`;
+        | ${periode}`;
 
     const listrik = Number(item.electricity_emission) || 0;
     const bus = Number(item.bus_emission) || 0;
@@ -365,7 +434,7 @@ function showChart(index, element,  button){
     }
 }
 
-// auto load
+changePeriod();
 loadHistory();
 
 </script>
