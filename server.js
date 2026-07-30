@@ -426,49 +426,86 @@ app.get('/history', (req, res) => {
     if (!req.session.user) {
         return res.status(401).send("Unauthorized");
     }
-    const userId = req.session.user.id;
     const { type, value } = req.query;
     let sql = `SELECT * FROM carbon_data WHERE 1=1`;
     let params = [];
-    if(type === "monthly"){ sql += " AND month = ?"; params.push(value); }
+    // BULANAN
+    if (type === "monthly") {
+        sql += " AND month = ?";
+        params.push(value);
+    }
+    // TRIWULAN
+    else if (type === "quarterly") {
+        let months = [];
+        if (value === "Q1")
+            months = ["Januari","Februari","Maret"];
+        else if (value === "Q2")
+            months = ["April","Mei","Juni"];
+        else if (value === "Q3")
+            months = ["Juli","Agustus","September"];
+        else if (value === "Q4")
+            months = ["Oktober","November","Desember"];
+        sql += ` AND month IN (${months.map(()=>"?").join(",")})`;
+        params.push(...months);
+    }
+    // SEMESTER
+    else if (type === "semester") {
+        let months = [];
+        if (value == "1") {
+            months = [
+                "Januari",
+                "Februari",
+                "Maret",
+                "April",
+                "Mei",
+                "Juni"
+            ];
+        } else {
+            months = [
+                "Juli",
+                "Agustus",
+                "September",
+                "Oktober",
+                "November",
+                "Desember"
+            ];
+        }
+        sql += ` AND month IN (${months.map(()=>"?").join(",")})`;
+        params.push(...months);
+    }
+    // TAHUNAN
+    else if (type === "yearly") {
+
+        sql += " AND year = ?";
+        params.push(value);
+
+    }
+    sql += `
+        ORDER BY
+        FIELD(
+            month,
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember'
+        )
+    `;
+
     db.query(sql, params, (err, result) => {
         if (err) {
             console.error(err);
-            return res.send("Database error");
+            return res.status(500).send("Database error");
         }
         res.json(result);
     });
-
-});
-
-// ======================
-// DELETE CARBON DATA
-// ======================
-app.delete('/delete-carbon/:id', (req, res) => {
-
-    if (!req.session.user) {
-        return res.status(401).send("Unauthorized");
-    }
-
-    // kalau mau khusus admin (opsional, tapi bagus buat TA)
-    if (req.session.user.role !== 'admin') {
-        return res.status(403).send("Hanya admin yang bisa hapus data");
-    }
-
-    const { id } = req.params;
-
-    const sql = "DELETE FROM carbon_data WHERE id = ?";
-
-    db.query(sql, [id], (err) => {
-
-        if (err) {
-            console.error(err);
-            return res.send("Database error");
-        }
-
-        res.send("Data berhasil dihapus!");
-    });
-
 });
 
 // ======================

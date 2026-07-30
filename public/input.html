@@ -633,69 +633,85 @@ function calcTransport(){
     `;
 }
 
-function showTotal(){
+function showTotal() {
+    const periodType = document.getElementById("periodType").value;
+    const periodValue = document.getElementById("periodValue").value;
+    fetch(`/history?type=${periodType}&value=${periodValue}`)
+    .then(res => res.json())
+    .then(data => {
+        let electricity = 0;
+        let bus = 0;
+        let car = 0;
+        let motor = 0;
+        data.forEach(item => {
+            electricity += Number(item.electricity_emission);
+            bus += Number(item.bus_emission);
+            car += Number(item.car_emission);
+            motor += Number(item.motor_emission);
+        });
+        const transport = bus + car + motor;
+        const total = electricity + transport;
+        // CARD TOTAL
+        document.getElementById("finalResult").classList.remove("d-none");
+        document.getElementById("finalResult").innerHTML = `
+        <div class="row g-4">
 
-    const total = electricityEmission + busEmission + carEmission + motorEmission;
+            <div class="col-md-4">
+                <div class="card shadow border-success h-100">
+                    <div class="card-body text-center">
+                        <h3>🌱</h3>
+                        <h5>Total Emisi</h5>
+                        <h2 class="fw-bold">${total.toFixed(2)}</h2>
+                        <small>metric tons CO₂</small>
+                    </div>
+                </div>
+            </div>
 
-    const transportEmission = busEmission + carEmission + motorEmission;
-    document.getElementById("finalResult").classList.remove("d-none");
-    document.getElementById("finalResult").innerHTML = `
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card shadow border-success h-100">
-                <div class="card-body text-center">
-                    <h3>🌱</h3>
-                    <h5>Total Emisi</h5>
-                    <h2 class="fw-bold">${total.toFixed(2)}</h2>
-                    <small>metric tons CO₂</small>
+            <div class="col-md-4">
+                <div class="card shadow border-primary h-100">
+                    <div class="card-body text-center">
+                        <h3>⚡</h3>
+                        <h5>Listrik</h5>
+                        <h2 class="fw-bold">${electricity.toFixed(2)}</h2>
+                        <small>metric tons CO₂</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow border-warning h-100">
+                    <div class="card-body text-center">
+                        <h3>🚗</h3>
+                        <h5>Transportasi</h5>
+                        <h2 class="fw-bold">${transport.toFixed(2)}</h2>
+                        <small>metric tons CO₂</small>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow border-primary h-100">
-                <div class="card-body text-center">
-                    <h3>⚡</h3>
-                    <h5>Listrik</h5>
-                    <h2 class="fw-bold">${electricityEmission.toFixed(2)}</h2>
-                    <small>metric tons CO₂</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow border-warning h-100">
-                <div class="card-body text-center">
-                    <h3>🚗</h3>
-                    <h5>Transportasi</h5>
-                    <h2 class="fw-bold">${transportEmission.toFixed(2)}</h2>
-                    <small>metric tons CO₂</small>
-                </div>
-            </div>
-        </div>
-    </div>
-    `;
-
-    if(todayChart){todayChart.destroy();}
-
-    todayChart = new Chart(document.getElementById("todayChart"),{
-        type:'bar',
-        data:{
-            labels:['⚡ Electricity','🚌 Bus','🚗 Car','🏍 Motorcycle'],
-            datasets:[{
-                label:'Emission (metric tons CO₂)',
-                data:[electricityEmission,busEmission,carEmission,motorEmission],
-                backgroundColor:['#1b2a49','#4e73df','#36b9cc','#f6c23e']
-            }]
-        },
-        options:{
-            responsive:true,
-            scales:{
-                y:{
-                    beginAtZero:true
+        `;
+        // GRAFIK BREAKDOWN
+        if (todayChart) {
+            todayChart.destroy();
+        }
+        todayChart = new Chart(document.getElementById("todayChart"), {
+            type: 'bar',
+            data: {
+                labels: ['⚡ Electricity', '🚌 Bus', '🚗 Car', '🏍 Motorcycle'],
+                datasets: [{
+                    label: 'Emission (metric tons CO₂)',
+                    data: [ electricity, bus, car, motor ],
+                    backgroundColor: [ '#1b2a49', '#4e73df', '#36b9cc', '#f6c23e' ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
                 }
             }
-        }
+        });
     });
-
 }
 
 function changePeriod() {
@@ -755,7 +771,12 @@ function changePeriod() {
         `;
     }
 }
+
 changePeriod();
+document.getElementById("periodType")
+.addEventListener("change", loadHistory);
+document.getElementById("periodValue")
+.addEventListener("change", loadHistory);
 
 function saveData(){
     const total = electricityEmission + busEmission + carEmission + motorEmission;
@@ -922,12 +943,11 @@ function loadHistory(){
         let labels=[];
         let totals=[];
         let html = `
-        <h5 class="mb-3">📋 History Data</h5>
         <div class="table-responsive">
         <table class="table table-bordered table-hover shadow-sm">
         <thead style="background:#1b2a49; color:white;">
         <tr>
-        <th>Tanggal</th>
+        <th>Periode</th>
         <th>Nama Perguruan Tinggi</th>
         <th>Total Emisi</th>
         <th>Aksi</th>
@@ -936,8 +956,8 @@ function loadHistory(){
         <tbody>
         `;
         data.forEach(item=>{
-            const date = new Date(item.created_at).toLocaleDateString();
-            labels.push([date, shortUniversityName(item.university_name)]);
+            const period = `${item.month} ${item.year}`;
+            labels.push(period);
             totals.push(item.total_emission);
             html += `
             <tr onclick="showHistoryChart(
@@ -947,7 +967,7 @@ function loadHistory(){
                 ${item.motor_emission},
                 ${item.total_emission}
             )" style="cursor:pointer">
-                <td>${date}</td>
+                <td>${periode}</td>
                 <td>${item.university_name ?? '-'}</td>
                 <td><b>${item.total_emission} ton</b></td>
                 <td>
@@ -989,7 +1009,7 @@ function loadHistory(){
             data:{
                 labels:labels,
                 datasets:[{
-                    label:'Total Emission per Date',
+                    label:'Total Emission',
                     data:totals,
                     backgroundColor: '#1b2a49'
                 }]
