@@ -215,7 +215,6 @@ function loadHistory(){
             <th>Periode</th>
             <th>Nama Perguruan Tinggi</th>
             <th>Total Emisi</th>
-            <th>Aksi</th>
         </tr>
         </thead>
         <tbody>
@@ -231,20 +230,12 @@ function loadHistory(){
             // 🔥 masukin ke chart total
             labels.push([periode, item.university_name]);
             totals.push(total);
-
             html += `
-            <tr>
+            <tr onclick="showChart(${index}, this)"
+                style="cursor:pointer;">
                 <td>${periode}</td>
                 <td>${item.university_name ?? '-'}</td>
                 <td><b>${total} ton</b></td>
-
-                <td>
-                    <button
-                        class="btn btn-success btn-sm"
-                        onclick="showChart(${index}, this.closest('tr'), this)">
-                        <i class="bi bi-bar-chart-fill"></i> Tampilkan
-                    </button>
-                </td>
             </tr>
             `;
         });
@@ -306,62 +297,29 @@ function loadHistory(){
 // ======================
 // SHOW CHART PER DATA
 // ======================
-function showChart(index, element,  button){
-
+function showChart(index, element){
     const item = globalData[index];
-
     // 🔥 highlight row
     document.querySelectorAll("#historyBox tbody tr")
         .forEach(tr => tr.classList.remove("active-row"));
     if(element){
         element.classList.add("active-row");
     }
-
-    // kembalikan tombol sebelumnya
-    if(activeButton){
-
-        activeButton.classList.remove("btn-secondary");
-        activeButton.classList.add("btn-success");
-
-        activeButton.innerHTML =
-            '<i class="bi bi-bar-chart-fill"></i> Tampilkan';
-    }
-
-    // ubah tombol yang dipilih
-    if(button){
-
-        button.classList.remove("btn-success");
-        button.classList.add("btn-secondary");
-
-        button.innerHTML =
-            '<i class="bi bi-check-circle-fill"></i> Sedang Ditampilkan';
-
-        activeButton = button;
-    }
-
-    const date = item.created_at
-    ? new Date(item.created_at).toLocaleDateString()
-    : "-";
-
+    const periode = `${item.month} ${item.year}`;
     document.getElementById("selectedInfo").style.display = "block";
-
     document.getElementById("selectedInfo").innerHTML =
         `📍 Menampilkan data:
         <b>${item.university_name ?? "-"}</b>
         | ${periode}`;
-
     const listrik = Number(item.electricity_emission) || 0;
     const bus = Number(item.bus_emission) || 0;
     const mobil = Number(item.car_emission) || 0;
     const motor = Number(item.motor_emission) || 0;
     const total = Number(item.total_emission) || 0;
-
     if(historyChart){
         historyChart.destroy();
     }
-
     const ctx = document.getElementById("historyChart").getContext("2d");
-
     historyChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -436,8 +394,6 @@ function showChart(index, element,  button){
 
 changePeriod();
 loadHistory();
-
 </script>
-
 </body>
 </html>
